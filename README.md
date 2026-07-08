@@ -2,6 +2,7 @@ TEAM MEMBERS:
 David Chukwudi Igberi
 Akuegbo Iheanyi Ejeagba
 Micah Brown
+Daniel Ayvazyan
 
 AI Generated Project Ideas:
 
