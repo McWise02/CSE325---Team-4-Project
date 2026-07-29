@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("e0831c86-c2c0-474e-b170-40cfa02376ee")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("Recipe_and_Meal_Tracker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b9213e15822a6a332437957e19eca3852d42dee0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+746af49e20afb21ef87792a9d8f06113b20c1705")]
 [assembly: System.Reflection.AssemblyProductAttribute("Recipe_and_Meal_Tracker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Recipe_and_Meal_Tracker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,10 +1,19 @@
 using Recipe_and_Meal_Tracker.Components;
+using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
 
+Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options =>  options.UseSqlServer(connectionString));
+ 
 
 var app = builder.Build();
 
