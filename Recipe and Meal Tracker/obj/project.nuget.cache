@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "mWwsNhAwz1o=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\micah\\PythonProjects\\BYU_PATHWAY\\CSE325 - Team 4 Project\\Recipe and Meal Tracker\\Recipe and Meal Tracker.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\micah\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.1\\microsoft.aspnetcore.app.internal.assets.10.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
