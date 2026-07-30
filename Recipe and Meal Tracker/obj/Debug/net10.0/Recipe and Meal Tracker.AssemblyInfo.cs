@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Recipe_and_Meal_Tracker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+746af49e20afb21ef87792a9d8f06113b20c1705")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5292cd8ad8699748b5f728729605254ed04b19b9")]
 [assembly: System.Reflection.AssemblyProductAttribute("Recipe_and_Meal_Tracker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Recipe_and_Meal_Tracker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

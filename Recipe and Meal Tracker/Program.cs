@@ -1,6 +1,7 @@
 using Recipe_and_Meal_Tracker.Components;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using RecipeAndMealTracker.Data;
 
 Env.Load();
 var builder = WebApplication.CreateBuilder(args);
@@ -10,9 +11,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
-builder.Services.AddDbContext<AppDbContext>(options =>  options.UseSqlServer(connectionString));
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
  
 
 var app = builder.Build();
@@ -32,5 +34,15 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+
+
+using (var scope = app.Services.CreateScope()) {
+         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+         if (dbContext.Database.CanConnect())     {
+            Console.WriteLine("✅ Connection to Azure SQL succeeded!");
+                 }
+        else    {Console.WriteLine("❌ Connection failed! Check your .env file or Azure Firewall.");}
+         }
 
 app.Run();

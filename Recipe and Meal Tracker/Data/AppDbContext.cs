@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using RecipeAndMealTracker.Models;
 
-public class AppDbContext : DbContext
+namespace RecipeAndMealTracker.Data;
+
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-        
-    }
-
-    // Define your DbSet properties here
+    public DbSet<Recipe> Recipes => Set<Recipe>();
 }
