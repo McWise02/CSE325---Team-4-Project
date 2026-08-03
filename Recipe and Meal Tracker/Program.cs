@@ -4,17 +4,18 @@ using DotNetEnv;
 using RecipeAndMealTracker.Data;
 
 Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-
-var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+var connectionString = builder.Configuration
+    .GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' was not found.");
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(
+        connectionString,
+        sqlOptions => sqlOptions.EnableRetryOnFailure()));
  
 
 var app = builder.Build();
