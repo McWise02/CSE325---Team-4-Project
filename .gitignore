@@ -1,3 +1,5 @@
 .env
 .vscode
 Recipe and Meal Tracker/bin
+obj/
+bin/
