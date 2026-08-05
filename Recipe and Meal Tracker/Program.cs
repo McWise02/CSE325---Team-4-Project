@@ -9,12 +9,14 @@ Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 var connectionString = builder.Configuration
     .GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
         "Connection string 'DefaultConnection' was not found.");
 
-builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
@@ -95,12 +97,24 @@ app.MapRazorComponents<App>()
 
 
 
-using (var scope = app.Services.CreateScope()) {
-         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-         if (dbContext.Database.CanConnect())     {
-            Console.WriteLine("✅ Connection to Azure SQL succeeded!");
-                 }
-        else    {Console.WriteLine("❌ Connection failed! Check your .env file or Azure Firewall.");}
-         }
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContext =
+        scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    try
+    {
+        await dbContext.Database.OpenConnectionAsync();
+
+        Console.WriteLine("✅ Connection to Azure SQL succeeded!");
+
+        await dbContext.Database.CloseConnectionAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ Azure SQL connection failed:");
+        Console.WriteLine(ex.ToString());
+    }
+}
 
 app.Run();
