@@ -2,10 +2,15 @@ using Recipe_and_Meal_Tracker.Components;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using RecipeAndMealTracker.Data;
+using RecipeAndMealTracker.Services;
 
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 
 var connectionString = builder.Configuration
     .GetConnectionString("DefaultConnection")
@@ -16,7 +21,8 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlServer(
         connectionString,
         sqlOptions => sqlOptions.EnableRetryOnFailure()));
- 
+
+builder.Services.AddScoped<PantryService>();
 
 var app = builder.Build();
 
@@ -38,12 +44,8 @@ app.MapRazorComponents<App>()
 
 
 
-using (var scope = app.Services.CreateScope()) {
-         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-         if (dbContext.Database.CanConnect())     {
-            Console.WriteLine("✅ Connection to Azure SQL succeeded!");
-                 }
-        else    {Console.WriteLine("❌ Connection failed! Check your .env file or Azure Firewall.");}
-         }
+// Applies pending migrations and seeds the starter pantry on first run. Reports the
+// connection result through the logger and never stops the app from starting.
+await SeedDatabase.InitializeAsync(app.Services, app.Logger);
 
 app.Run();
