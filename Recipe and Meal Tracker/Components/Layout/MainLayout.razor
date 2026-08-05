@@ -7,12 +7,24 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <div class="top-row-context">
+                <span class="top-row-eyebrow">CSE 325 &middot; Team 4</span>
+                <span class="top-row-title">Recipe &amp; Meal Tracker</span>
+            </div>
+            <div class="top-row-links">
+                <NavLink href="inventory/new">Add pantry item</NavLink>
+                <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" rel="noopener">Docs</a>
+            </div>
         </div>
 
         <article class="content px-4">
             @Body
         </article>
+
+        <footer class="app-footer px-4">
+            <span>&copy; @DateTime.Now.Year Team 4 &mdash; Recipe &amp; Meal Tracker</span>
+            <span class="app-footer-tech">Built with Blazor &amp; Entity Framework Core</span>
+        </footer>
     </main>
 </div>
 

@@ -1,6 +1,12 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Recipe and Meal Tracker</a>
+        <a class="navbar-brand" href="">
+            <span class="brand-mark" aria-hidden="true">RM</span>
+            <span class="brand-text">
+                <span class="brand-name">Recipe &amp; Meal</span>
+                <span class="brand-sub">Tracker</span>
+            </span>
+        </a>
     </div>
 </div>
 
@@ -8,23 +14,32 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
+        <div class="nav-section">Overview</div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+
+        <div class="nav-section">Pantry</div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="inventory">
+                <span class="bi bi-box-seam-nav-menu" aria-hidden="true"></span> Inventory
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="inventory/restock">
+                <span class="bi bi-cart-nav-menu" aria-hidden="true"></span> Restock list
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            <NavLink class="nav-link" href="inventory/new">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Add item
             </NavLink>
         </div>
     </nav>
 </div>
-
