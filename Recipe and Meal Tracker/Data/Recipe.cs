@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-
+using System.ComponentModel.DataAnnotations.Schema;
+using RecipeAndMealTracker.Data;
 namespace RecipeAndMealTracker.Models;
 
 public class Recipe
@@ -13,4 +14,9 @@ public class Recipe
     public string? Instructions { get; set; }
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    public string? CreatedById { get; set; }
+
+    [ForeignKey(nameof(CreatedById))]
+    public ApplicationUser? CreatedBy { get; set; }
 }

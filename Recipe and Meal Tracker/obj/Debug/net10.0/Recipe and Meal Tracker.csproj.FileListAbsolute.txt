@@ -213,3 +213,4 @@ C:\Users\micah\PythonProjects\BYU_PATHWAY\CSE325 - Team 4 Project\Recipe and Mea
 C:\Users\micah\PythonProjects\BYU_PATHWAY\CSE325 - Team 4 Project\Recipe and Meal Tracker\bin\Debug\net10.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\Users\micah\PythonProjects\BYU_PATHWAY\CSE325 - Team 4 Project\Recipe and Meal Tracker\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\Users\micah\PythonProjects\BYU_PATHWAY\CSE325 - Team 4 Project\Recipe and Meal Tracker\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
+C:\Users\micah\PythonProjects\BYU_PATHWAY\CSE325 - Team 4 Project\Recipe and Meal Tracker\bin\Debug\net10.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll

@@ -1,0 +1,74 @@
+@page "/register"
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
+
+<PageTitle>Register</PageTitle>
+
+<h1>Register</h1>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert alert-danger">
+        @Error
+    </div>
+}
+
+<form method="post" action="/auth/register">
+    <AntiforgeryToken />
+
+    <div class="mb-3">
+        <label for="register-email" class="form-label">
+            Email
+        </label>
+
+        <input id="register-email"
+               name="Email"
+               type="email"
+               class="form-control"
+               autocomplete="email"
+               required />
+    </div>
+
+    <div class="mb-3">
+        <label for="register-password" class="form-label">
+            Password
+        </label>
+
+        <input id="register-password"
+               name="Password"
+               type="password"
+               class="form-control"
+               autocomplete="new-password"
+               minlength="10"
+               required />
+    </div>
+
+    <div class="mb-3">
+        <label for="register-confirm-password"
+               class="form-label">
+            Confirm password
+        </label>
+
+        <input id="register-confirm-password"
+               name="ConfirmPassword"
+               type="password"
+               class="form-control"
+               autocomplete="new-password"
+               minlength="10"
+               required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Register
+    </button>
+</form>
+
+<p class="mt-3">
+    Already registered?
+    <a href="/login">Log in</a>
+</p>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+}
