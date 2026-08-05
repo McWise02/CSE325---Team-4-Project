@@ -1,0 +1,351 @@
+@page "/inventory"
+@page "/inventory/restock"
+@rendermode InteractiveServer
+@inject PantryService Pantry
+@inject NavigationManager Navigation
+
+<PageTitle>Pantry inventory — Recipe &amp; Meal Tracker</PageTitle>
+
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Pantry</span>
+        <h1>@(_restockView ? "Restock list" : "Inventory")</h1>
+        <p class="lead">
+            @(_restockView
+                ? "Everything at or below its reorder point. Top an item up with the + button and it drops off this list."
+                : "Track what is on the shelf, how much is left, and what needs buying before the next shop.")
+        </p>
+    </div>
+    <div>
+        <a class="btn btn-primary" href="inventory/new">Add item</a>
+    </div>
+</div>
+
+@if (_loadError is not null)
+{
+    <div class="notice notice-danger">
+        <strong>The pantry could not be loaded.</strong>
+        <div>@_loadError</div>
+    </div>
+}
+
+<div class="stat-grid">
+    <StatTile Label="Items tracked" Value="@_stats.TotalItems.ToString()" Tone="tone-brand" />
+    <StatTile Label="Low stock" Value="@_stats.LowStockCount.ToString()" Tone="tone-warn"
+              Hint="At or below reorder point" Href="inventory/restock" />
+    <StatTile Label="Out of stock" Value="@_stats.OutOfStockCount.ToString()" Tone="tone-danger"
+              Hint="Nothing left on the shelf" />
+    <StatTile Label="Expiring soon" Value="@_stats.ExpiringSoonCount.ToString()" Tone="tone-ok"
+              Hint="@($"Within {PantryItem.ExpiringSoonWindowDays} days")" />
+</div>
+
+<div class="card-panel">
+    <div class="card-panel-header">
+        <h2>@(_items.Count == 1 ? "1 item" : $"{_items.Count} items")</h2>
+        @if (_query.HasFilters)
+        {
+            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="ClearFiltersAsync">
+                Clear filters
+            </button>
+        }
+    </div>
+
+    <div class="card-panel-body">
+        <div class="toolbar">
+            <div class="toolbar-field grow">
+                <label for="search">Search</label>
+                <input id="search" class="form-control" type="search" placeholder="Name, note or location"
+                       value="@_query.Search" @oninput="OnSearchInput" />
+            </div>
+
+            <div class="toolbar-field">
+                <label for="category">Category</label>
+                <select id="category" class="form-select" value="@(_query.Category?.ToString() ?? "")"
+                        @onchange="OnCategoryChanged">
+                    <option value="">All categories</option>
+                    @foreach (var category in Enum.GetValues<PantryCategory>())
+                    {
+                        <option value="@category">@PantryDisplay.Label(category)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="toolbar-field">
+                <label for="status">Stock level</label>
+                <select id="status" class="form-select" value="@_query.Filter.ToString()"
+                        @onchange="OnFilterChanged">
+                    @foreach (var filter in Enum.GetValues<StockFilter>())
+                    {
+                        <option value="@filter">@PantryQueryDisplay.Label(filter)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="toolbar-field">
+                <label for="sort">Sort by</label>
+                <select id="sort" class="form-select" value="@_query.Sort.ToString()" @onchange="OnSortChanged">
+                    @foreach (var sort in Enum.GetValues<PantrySort>())
+                    {
+                        <option value="@sort">@PantryQueryDisplay.Label(sort)</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="empty-state"><em>Loading inventory…</em></div>
+    }
+    else if (_items.Count == 0)
+    {
+        <div class="empty-state">
+            @if (_query.HasFilters)
+            {
+                <h3>No items match those filters</h3>
+                <p>Try a different search term or stock level.</p>
+                <button type="button" class="btn btn-outline-secondary" @onclick="ClearFiltersAsync">
+                    Clear filters
+                </button>
+            }
+            else
+            {
+                <h3>The pantry is empty</h3>
+                <p>Add the first ingredient to start tracking stock levels.</p>
+                <a class="btn btn-primary" href="inventory/new">Add item</a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th scope="col">Category</th>
+                        <th scope="col" class="num">On hand</th>
+                        <th scope="col" class="num">Reorder at</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Best before</th>
+                        <th scope="col"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _items)
+                    {
+                        <tr @key="item.Id" class="@(item.Status == StockStatus.OutOfStock ? "row-danger" : null)">
+                            <td>
+                                <span class="cell-title">@item.Name</span>
+                                @if (!string.IsNullOrWhiteSpace(item.StorageLocation))
+                                {
+                                    <span class="cell-sub">@item.StorageLocation</span>
+                                }
+                            </td>
+                            <td>@PantryDisplay.Label(item.Category)</td>
+                            <td class="num">
+                                <div class="stepper">
+                                    <button type="button" class="btn-step" title="Use some"
+                                            disabled="@(item.Quantity <= 0 || _busyId == item.Id)"
+                                            @onclick="() => AdjustAsync(item, -PantryDisplay.StepFor(item.Unit))">
+                                        &minus;
+                                    </button>
+                                    <span class="stepper-value">@PantryDisplay.QuantityWithUnit(item)</span>
+                                    <button type="button" class="btn-step" title="Add stock"
+                                            disabled="@(_busyId == item.Id)"
+                                            @onclick="() => AdjustAsync(item, PantryDisplay.StepFor(item.Unit))">
+                                        +
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="num">@PantryDisplay.Quantity(item.ReorderThreshold) @PantryDisplay.Abbreviation(item.Unit)</td>
+                            <td><StockStatusBadge Item="item" /></td>
+                            <td>
+                                @if (item.ExpiresOn is { } expires)
+                                {
+                                    @expires.ToString("d MMM yyyy")
+                                }
+                                else
+                                {
+                                    <span class="cell-sub">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (_pendingDeleteId == item.Id)
+                                {
+                                    <div class="cell-actions">
+                                        <span class="cell-sub">Delete this item?</span>
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                disabled="@(_busyId == item.Id)"
+                                                @onclick="() => ConfirmDeleteAsync(item)">
+                                            Yes, delete
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => _pendingDeleteId = null">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="cell-actions">
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                           href="@($"inventory/{item.Id}/edit")">Edit</a>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => _pendingDeleteId = item.Id">
+                                            Delete
+                                        </button>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly PantryQuery _query = new();
+
+    private List<PantryItem> _items = [];
+    private PantryStats _stats = PantryStats.Empty;
+    private bool _loading = true;
+    private bool _restockView;
+    private string? _loadError;
+
+    /// <summary>Item currently mid-save, so its buttons can be disabled.</summary>
+    private int? _busyId;
+
+    /// <summary>Item showing the inline delete confirmation.</summary>
+    private int? _pendingDeleteId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri).Split('?')[0].Trim('/');
+
+        if (path.Equals("inventory/restock", StringComparison.OrdinalIgnoreCase))
+        {
+            _restockView = true;
+            _query.Filter = StockFilter.NeedsRestock;
+            _query.Sort = PantrySort.QuantityAscending;
+        }
+
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _loading = true;
+        _loadError = null;
+
+        try
+        {
+            _items = await Pantry.GetItemsAsync(_query);
+            _stats = await Pantry.GetStatsAsync();
+        }
+        catch (Exception ex)
+        {
+            _items = [];
+            _stats = PantryStats.Empty;
+            _loadError = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs args)
+    {
+        _query.Search = args.Value?.ToString();
+        _pendingDeleteId = null;
+        await ReloadAsync();
+    }
+
+    private async Task OnCategoryChanged(ChangeEventArgs args)
+    {
+        var raw = args.Value?.ToString();
+        _query.Category = Enum.TryParse<PantryCategory>(raw, out var category) ? category : null;
+        await ReloadAsync();
+    }
+
+    private async Task OnFilterChanged(ChangeEventArgs args)
+    {
+        _query.Filter = Enum.TryParse<StockFilter>(args.Value?.ToString(), out var filter)
+            ? filter
+            : StockFilter.All;
+        await ReloadAsync();
+    }
+
+    private async Task OnSortChanged(ChangeEventArgs args)
+    {
+        _query.Sort = Enum.TryParse<PantrySort>(args.Value?.ToString(), out var sort)
+            ? sort
+            : PantrySort.NameAscending;
+        await ReloadAsync();
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        _query.Reset();
+        _pendingDeleteId = null;
+        await ReloadAsync();
+    }
+
+    private async Task AdjustAsync(PantryItem item, decimal delta)
+    {
+        _busyId = item.Id;
+
+        try
+        {
+            var updated = await Pantry.AdjustQuantityAsync(item.Id, delta);
+
+            if (updated is null)
+            {
+                // Someone else removed it — drop it from the list rather than showing a stale row.
+                await ReloadAsync();
+                return;
+            }
+
+            item.Quantity = updated.Quantity;
+            item.UpdatedAtUtc = updated.UpdatedAtUtc;
+            _stats = await Pantry.GetStatsAsync();
+
+            // The row may no longer belong in a filtered view once its level changes.
+            if (_query.Filter != StockFilter.All)
+            {
+                await ReloadAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            _loadError = ex.Message;
+        }
+        finally
+        {
+            _busyId = null;
+        }
+    }
+
+    private async Task ConfirmDeleteAsync(PantryItem item)
+    {
+        _busyId = item.Id;
+
+        try
+        {
+            await Pantry.DeleteItemAsync(item.Id);
+            _pendingDeleteId = null;
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            _loadError = ex.Message;
+        }
+        finally
+        {
+            _busyId = null;
+        }
+    }
+}

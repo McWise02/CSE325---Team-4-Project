@@ -1,7 +1,151 @@
-﻿@page "/"
+@page "/"
+@attribute [StreamRendering]
+@inject PantryService Pantry
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Recipe &amp; Meal Tracker</PageTitle>
 
-<h1>Hello, world!</h1>
+<section class="hero">
+    <span class="eyebrow">CSE 325 &middot; Team 4</span>
+    <h1>Plan meals around what you already have</h1>
+    <p>
+        Recipe &amp; Meal Tracker keeps your recipes and your pantry in one place. The stock
+        tracker knows what is on the shelf and how much is left, so the shopping list writes itself.
+    </p>
+    <div class="hero-actions">
+        <a class="btn btn-on-brand" href="inventory">Open pantry inventory</a>
+        <a class="btn btn-on-brand-ghost" href="inventory/new">Add an item</a>
+    </div>
+</section>
 
-Welcome to your new app.
+@if (_loadError is not null)
+{
+    <div class="notice notice-warn">
+        <strong>Live pantry figures are unavailable.</strong>
+        <div>@_loadError</div>
+    </div>
+}
+
+<div class="stat-grid">
+    <StatTile Label="Items tracked" Value="@_stats.TotalItems.ToString()" Tone="tone-brand"
+              Hint="Across the whole pantry" Href="inventory" />
+    <StatTile Label="Low stock" Value="@_stats.LowStockCount.ToString()" Tone="tone-warn"
+              Hint="At or below reorder point" Href="inventory/restock" />
+    <StatTile Label="Out of stock" Value="@_stats.OutOfStockCount.ToString()" Tone="tone-danger"
+              Hint="Buy before the next meal" Href="inventory/restock" />
+    <StatTile Label="Expiring soon" Value="@_stats.ExpiringSoonCount.ToString()" Tone="tone-ok"
+              Hint="@($"Within {PantryItem.ExpiringSoonWindowDays} days")" />
+</div>
+
+<div class="card-panel">
+    <div class="card-panel-header">
+        <h2>Needs restocking</h2>
+        <a class="btn btn-sm btn-outline-secondary" href="inventory/restock">View full list</a>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="empty-state"><em>Checking the shelves…</em></div>
+    }
+    else if (_restockList.Count == 0)
+    {
+        <div class="empty-state">
+            <h3>Everything is well stocked</h3>
+            <p>No items are at or below their reorder point.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th scope="col">Category</th>
+                        <th scope="col" class="num">On hand</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _restockList)
+                    {
+                        <tr @key="item.Id">
+                            <td>
+                                <span class="cell-title">@item.Name</span>
+                                @if (!string.IsNullOrWhiteSpace(item.StorageLocation))
+                                {
+                                    <span class="cell-sub">@item.StorageLocation</span>
+                                }
+                            </td>
+                            <td>@PantryDisplay.Label(item.Category)</td>
+                            <td class="num">@PantryDisplay.QuantityWithUnit(item)</td>
+                            <td><StockStatusBadge Item="item" /></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="card-panel">
+    <div class="card-panel-header">
+        <h2>What this app does</h2>
+    </div>
+    <div class="card-panel-body">
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Pantry stock tracking</h3>
+                <p>
+                    Every ingredient carries a quantity, a unit and a reorder point, so low and
+                    empty items surface on their own.
+                </p>
+            </div>
+            <div class="feature-card">
+                <h3>Best-before warnings</h3>
+                <p>
+                    Items approaching their date are flagged, which makes it easy to cook the
+                    things that will not keep.
+                </p>
+            </div>
+            <div class="feature-card">
+                <h3>Recipes</h3>
+                <p>
+                    Recipes are stored alongside the pantry, ready to be matched against the
+                    ingredients currently in stock.
+                </p>
+            </div>
+            <div class="feature-card">
+                <h3>Built on ASP.NET Core</h3>
+                <p>
+                    A Blazor Server front end over Entity Framework Core and Azure SQL, deployed
+                    from GitHub Actions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PantryStats _stats = PantryStats.Empty;
+    private List<PantryItem> _restockList = [];
+    private bool _loading = true;
+    private string? _loadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _stats = await Pantry.GetStatsAsync();
+            _restockList = await Pantry.GetRestockListAsync(limit: 5);
+        }
+        catch (Exception ex)
+        {
+            // The dashboard should still render if the database is unreachable.
+            _loadError = ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

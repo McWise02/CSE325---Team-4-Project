@@ -1,0 +1,232 @@
+@page "/inventory/new"
+@page "/inventory/{Id:int}/edit"
+@rendermode InteractiveServer
+@inject PantryService Pantry
+@inject NavigationManager Navigation
+
+<PageTitle>@(IsEdit ? "Edit pantry item" : "Add pantry item") — Recipe &amp; Meal Tracker</PageTitle>
+
+<div class="page-header">
+    <div>
+        <span class="eyebrow">Pantry</span>
+        <h1>@(IsEdit ? "Edit item" : "Add an item")</h1>
+        <p class="lead">
+            @(IsEdit
+                ? "Update the quantity on hand, the reorder point, or where this ingredient lives."
+                : "Record an ingredient and the level at which it should go back on the shopping list.")
+        </p>
+    </div>
+    <div>
+        <a class="btn btn-outline-secondary" href="inventory">Back to inventory</a>
+    </div>
+</div>
+
+@if (_notFound)
+{
+    <div class="card-panel">
+        <div class="empty-state">
+            <h3>That item no longer exists</h3>
+            <p>It may have been deleted by another team member.</p>
+            <a class="btn btn-primary" href="inventory">Back to inventory</a>
+        </div>
+    </div>
+}
+else if (_loadError is not null)
+{
+    <div class="card-panel">
+        <div class="empty-state">
+            <h3>This item could not be loaded</h3>
+            <p>@_loadError</p>
+            <a class="btn btn-primary" href="inventory">Back to inventory</a>
+        </div>
+    </div>
+}
+else if (!_loaded)
+{
+    <div class="card-panel">
+        <div class="empty-state"><em>Loading…</em></div>
+    </div>
+}
+else
+{
+    @if (_saveError is not null)
+    {
+        <div class="notice notice-danger">
+            <strong>The item could not be saved.</strong>
+            <div>@_saveError</div>
+        </div>
+    }
+
+    <div class="card-panel">
+        <div class="card-panel-body">
+            <EditForm Model="_item" OnValidSubmit="SaveAsync">
+                <DataAnnotationsValidator />
+
+                <div class="form-grid">
+                    <div class="form-field span-2">
+                        <label for="name">Item name</label>
+                        <InputText id="name" class="form-control" @bind-Value="_item.Name"
+                                   placeholder="e.g. All-purpose flour" />
+                        <ValidationMessage For="() => _item.Name" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="category">Category</label>
+                        <InputSelect id="category" class="form-select" @bind-Value="_item.Category">
+                            @foreach (var category in Enum.GetValues<PantryCategory>())
+                            {
+                                <option value="@category">@PantryDisplay.Label(category)</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="unit">Unit</label>
+                        <InputSelect id="unit" class="form-select" @bind-Value="_item.Unit">
+                            @foreach (var unit in Enum.GetValues<StockUnit>())
+                            {
+                                <option value="@unit">@PantryDisplay.Label(unit)</option>
+                            }
+                        </InputSelect>
+                        <span class="field-hint">How this ingredient is measured.</span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="quantity">Quantity on hand</label>
+                        <InputNumber id="quantity" class="form-control" step="0.001"
+                                     @bind-Value="_item.Quantity" />
+                        <ValidationMessage For="() => _item.Quantity" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="threshold">Reorder at or below</label>
+                        <InputNumber id="threshold" class="form-control" step="0.001"
+                                     @bind-Value="_item.ReorderThreshold" />
+                        <span class="field-hint">
+                            Hit this level and the item shows as low stock. Use 0 to only flag it when empty.
+                        </span>
+                        <ValidationMessage For="() => _item.ReorderThreshold" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="location">Stored in</label>
+                        <InputText id="location" class="form-control" @bind-Value="_item.StorageLocation"
+                                   placeholder="e.g. Fridge door" />
+                        <ValidationMessage For="() => _item.StorageLocation" />
+                    </div>
+
+                    <div class="form-field">
+                        <label for="expires">Best before</label>
+                        <InputDate id="expires" class="form-control" @bind-Value="_item.ExpiresOn" />
+                        <span class="field-hint">Optional. Items within @PantryItem.ExpiringSoonWindowDays days are flagged.</span>
+                    </div>
+
+                    <div class="form-field span-2">
+                        <label for="notes">Notes</label>
+                        <InputTextArea id="notes" class="form-control" rows="3" @bind-Value="_item.Notes"
+                                       placeholder="Anything the rest of the household should know." />
+                        <ValidationMessage For="() => _item.Notes" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" disabled="@_saving">
+                        @(_saving ? "Saving…" : (IsEdit ? "Save changes" : "Add to pantry"))
+                    </button>
+                    <a class="btn btn-outline-secondary" href="inventory">Cancel</a>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private PantryItem _item = new();
+    private bool _loaded;
+    private bool _saving;
+    private bool _notFound;
+
+    /// <summary>Set when the item itself could not be fetched, so the form is not shown.</summary>
+    private string? _loadError;
+
+    private string? _saveError;
+
+    private bool IsEdit => Id is not null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Reload only when the route actually points at a different item, so a
+        // re-render caused by typing never discards what the user has entered.
+        if (_loaded && _item.Id == (Id ?? 0))
+        {
+            return;
+        }
+
+        _notFound = false;
+        _loadError = null;
+        _saveError = null;
+
+        if (Id is not { } id)
+        {
+            _item = new PantryItem();
+            _loaded = true;
+            return;
+        }
+
+        try
+        {
+            var found = await Pantry.GetItemAsync(id);
+
+            if (found is null)
+            {
+                _notFound = true;
+            }
+            else
+            {
+                _item = found;
+            }
+
+            _loaded = true;
+        }
+        catch (Exception ex)
+        {
+            _loadError = ex.Message;
+            _loaded = true;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        _saveError = null;
+
+        try
+        {
+            if (IsEdit)
+            {
+                if (!await Pantry.UpdateItemAsync(_item))
+                {
+                    _notFound = true;
+                    return;
+                }
+            }
+            else
+            {
+                await Pantry.AddItemAsync(_item);
+            }
+
+            Navigation.NavigateTo("inventory");
+        }
+        catch (Exception ex)
+        {
+            _saveError = ex.Message;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

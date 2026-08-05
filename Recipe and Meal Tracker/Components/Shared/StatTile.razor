@@ -1,0 +1,42 @@
+@* A single dashboard figure. Renders as a link when Href is supplied. *@
+
+@if (string.IsNullOrWhiteSpace(Href))
+{
+    <div class="stat-tile @Tone">
+        <span class="stat-tile-label">@Label</span>
+        <span class="stat-tile-value">@Value</span>
+        @if (!string.IsNullOrWhiteSpace(Hint))
+        {
+            <span class="stat-tile-hint">@Hint</span>
+        }
+    </div>
+}
+else
+{
+    <NavLink class="@($"stat-tile {Tone}")" href="@Href">
+        <span class="stat-tile-label">@Label</span>
+        <span class="stat-tile-value">@Value</span>
+        @if (!string.IsNullOrWhiteSpace(Hint))
+        {
+            <span class="stat-tile-hint">@Hint</span>
+        }
+    </NavLink>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string Value { get; set; } = string.Empty;
+
+    /// <summary>One of the tone classes in app.css: tone-brand, tone-ok, tone-warn, tone-danger.</summary>
+    [Parameter]
+    public string Tone { get; set; } = "tone-brand";
+
+    [Parameter]
+    public string? Hint { get; set; }
+
+    [Parameter]
+    public string? Href { get; set; }
+}

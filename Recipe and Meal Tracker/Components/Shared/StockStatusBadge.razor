@@ -1,0 +1,17 @@
+@* Shows a pantry item's stock level, plus a best-before warning when one applies. *@
+
+<span class="pill @PantryDisplay.ToneClass(Item.Status)">@PantryDisplay.Label(Item.Status)</span>
+
+@if (Item.IsExpired)
+{
+    <span class="pill pill-plain tone-danger ms-1">Expired</span>
+}
+else if (Item.IsExpiringSoon)
+{
+    <span class="pill pill-plain tone-warn ms-1">Use soon</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public PantryItem Item { get; set; } = new();
+}
