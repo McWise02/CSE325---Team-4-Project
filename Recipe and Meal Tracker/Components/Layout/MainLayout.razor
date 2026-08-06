@@ -1,35 +1,55 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
 
 <div class="page">
 
-    <header class="header">
-        <h2>Recipe & Meal Tracker</h2>
+    @* <header class="header"> *@
+    @*     <h2>Recipe & Meal Tracker</h2> *@
+    @* *@
+    @*     <AuthorizeView> *@
+    @*         <Authorized Context="auth"> *@
+    @*             <span>Welcome, @auth.User.Identity?.Name!</span> *@
+    @* *@
+    @*             <form method="post" action="/auth/logout" style="display:inline;"> *@
+    @*                 <AntiforgeryToken /> *@
+    @*                 <button type="submit">Logout</button> *@
+    @*             </form> *@
+    @*         </Authorized> *@
+    @* *@
+    @*         <NotAuthorized> *@
+    @*             <a href="/login">Login</a> *@
+    @*             | *@
+    @*             <a href="/register">Register</a> *@
+    @*         </NotAuthorized> *@
+    @*     </AuthorizeView> *@
+    @* </header> *@
+    
+    @if (!_hideNav)
+    {
+        <NavMenu />
+    }
+    
+    <div class="content-container">
+        <main class="content">
+            @Body
+        </main>
 
-        <AuthorizeView>
-            <Authorized Context="auth">
-                <span>Welcome, @auth.User.Identity?.Name!</span>
-
-                <form method="post" action="/auth/logout" style="display:inline;">
-                    <AntiforgeryToken />
-                    <button type="submit">Logout</button>
-                </form>
-            </Authorized>
-
-            <NotAuthorized>
-                <a href="/login">Login</a>
-                |
-                <a href="/register">Register</a>
-            </NotAuthorized>
-        </AuthorizeView>
-    </header>
-
-    <main class="content">
-        @Body
-    </main>
-
-    <footer class="footer">
-        <p>&copy; @DateTime.Now.Year - Recipe & Meal Tracker</p>
-    </footer>
+        <footer class="footer">
+            <p>&copy; @DateTime.Now.Year - Recipe & Meal Tracker</p>
+        </footer>
+    </div>
 
 </div>
+
+@code
+{
+    private bool _hideNav;
+    
+    protected override void OnInitialized()
+    {
+        string currentUri = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        _hideNav = currentUri.StartsWith("login");
+    }
+}
