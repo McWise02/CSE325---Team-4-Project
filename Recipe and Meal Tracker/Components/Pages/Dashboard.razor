@@ -1,6 +1,14 @@
 ﻿@page "/dashboard"
+@using Microsoft.AspNetCore.Components.Authorization
 
 <h3>Dashboard</h3>
+
+<AuthorizeView>
+    <Authorized Context="auth">
+        <span>Welcome, @auth.User.Identity?.Name!</span>
+        
+    </Authorized>
+</AuthorizeView> 
 
 @code {
     

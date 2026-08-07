@@ -1,29 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
-@using Microsoft.AspNetCore.Components.Authorization
+
 
 <div class="page">
-
-    @* <header class="header"> *@
-    @*     <h2>Recipe & Meal Tracker</h2> *@
-    @* *@
-    @*     <AuthorizeView> *@
-    @*         <Authorized Context="auth"> *@
-    @*             <span>Welcome, @auth.User.Identity?.Name!</span> *@
-    @* *@
-    @*             <form method="post" action="/auth/logout" style="display:inline;"> *@
-    @*                 <AntiforgeryToken /> *@
-    @*                 <button type="submit">Logout</button> *@
-    @*             </form> *@
-    @*         </Authorized> *@
-    @* *@
-    @*         <NotAuthorized> *@
-    @*             <a href="/login">Login</a> *@
-    @*             | *@
-    @*             <a href="/register">Register</a> *@
-    @*         </NotAuthorized> *@
-    @*     </AuthorizeView> *@
-    @* </header> *@
     
     @if (!_hideNav)
     {

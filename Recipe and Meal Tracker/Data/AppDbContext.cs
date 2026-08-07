@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using RecipeAndMealTracker.Models;
+// using RecipeAndMealTracker.Models;
 
 namespace RecipeAndMealTracker.Data;
 
@@ -8,5 +8,5 @@ public sealed class AppDbContext(
     DbContextOptions<AppDbContext> options)
     : IdentityDbContext<ApplicationUser>(options)
 {
-    public DbSet<Recipe> Recipes => Set<Recipe>();
+    public DbSet<Recipe> Recipes { get; set; }
 }
