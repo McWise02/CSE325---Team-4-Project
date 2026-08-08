@@ -1,30 +1,31 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Recipe and Meal Tracker</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+﻿<div class="nav-container">
+    <a href="/" class="title-link" aria-hidden="true">
+        <span class="logo-icon"></span>
+        Meal & Recipe
+    </a>
+    
+    <nav>
+        <NavLink class="nc-link slide-underline" href="dashboard">
+            <span class="dashboard-icon"></span>
+            <span aria-hidden="true"></span> Dashboard
+        </NavLink>
+        <NavLink class="nc-link slide-underline" href="planner">
+            <span class="planner-icon"></span>
+            <span aria-hidden="true"></span> Planner
+        </NavLink>
+        <NavLink class="nc-link slide-underline" href="recipes">
+            <span class="recipe-icon"></span>
+            <span aria-hidden="true"></span> Recipes
+        </NavLink>
+        <NavLink class="nc-link slide-underline" href="stock">
+            <span class="stock-icon"></span>
+            <span aria-hidden="true"></span> Stock
+        </NavLink>
     </nav>
+    
+    <form class="nc-logout-form" method="post" action="/auth/logout">
+        <AntiforgeryToken />
+        <button class="nc-logout-button" type="submit">Logout</button>
+    </form>
 </div>
 

@@ -1,0 +1,79 @@
+@page "/login"
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert alert-danger">
+        @Error
+    </div>
+}
+
+<form method="post" action="/auth/login">
+    <AntiforgeryToken />
+
+    <input type="hidden"
+           name="ReturnUrl"
+           value="@ReturnUrl" />
+
+    <div class="mb-3">
+        <label for="login-email" class="form-label">
+            Email
+        </label>
+
+        <input id="login-email"
+               name="Email"
+               type="email"
+               class="form-control"
+               autocomplete="email"
+               required />
+    </div>
+
+    <div class="mb-3">
+        <label for="login-password" class="form-label">
+            Password
+        </label>
+
+        <input id="login-password"
+               name="Password"
+               type="password"
+               class="form-control"
+               autocomplete="current-password"
+               required />
+    </div>
+
+    <div class="form-check mb-3">
+        <input id="remember-me"
+               name="RememberMe"
+               type="checkbox"
+               value="true"
+               class="form-check-input" />
+
+        <label for="remember-me" class="form-check-label">
+            Remember me
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Log in
+    </button>
+</form>
+
+<p class="mt-3">
+    Don't have an account?
+    <a href="/register">Register</a>
+</p>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+
+}

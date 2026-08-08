@@ -1,12 +1,14 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecipeAndMealTracker.Models;
 
 namespace RecipeAndMealTracker.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options)
-    : DbContext(options)
+public sealed class AppDbContext(
+    DbContextOptions<AppDbContext> options)
+    : IdentityDbContext<ApplicationUser>(options)
 {
-    public DbSet<Recipe> Recipes => Set<Recipe>();
+    public DbSet<Recipe> Recipes { get; set; }
     public DbSet<MealEntry> MealEntries => Set<MealEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
