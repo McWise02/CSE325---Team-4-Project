@@ -2,9 +2,10 @@
 @inject NavigationManager Navigation
 
 
+
 <div class="page">
     
-    @if (!_hideNav)
+    @if (!_hide)
     {
         <NavMenu />
     }
@@ -13,22 +14,25 @@
         <main class="content">
             @Body
         </main>
-
-        <footer class="footer">
-            <p>&copy; @DateTime.Now.Year - Recipe & Meal Tracker</p>
-        </footer>
+        
+        @if (!_hide)
+        {
+            <footer class="footer">
+                <p>&copy; @DateTime.Now.Year - Recipe & Meal Tracker</p>
+            </footer>
+        }
     </div>
 
 </div>
 
 @code
 {
-    private bool _hideNav;
+    private bool _hide;
     
     protected override void OnInitialized()
     {
         string currentUri = Navigation.ToBaseRelativePath(Navigation.Uri);
 
-        _hideNav = currentUri.StartsWith("login");
+        _hide = currentUri.StartsWith("login") || currentUri.StartsWith("register");
     }
 }

@@ -4,71 +4,84 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<div class="auth-page">
+    
+    <div class="auth-form">
+        <h1 href="/" class="auth-title" aria-hidden="true" style="color: var(--action-color)">
+            <span class="logo-icon" style="background-color: var(--action-color); scale: 180%"></span>
+            Meal & Recipe
+        </h1>
+        
+        <h2 style="font-weight: bold;">Register</h2>
 
-@if (!string.IsNullOrWhiteSpace(Error))
-{
-    <div class="alert alert-danger">
-        @Error
+        <form method="post" action="/auth/register">
+            <AntiforgeryToken/>
+
+            <div class="auth-form-group">
+                <label for="register-email" class="auth-form-label">
+                    Email
+                </label>
+
+                <input id="register-email"
+                       name="Email"
+                       type="email"
+                       class="auth-form-control"
+                       autocomplete="email"
+                       autofocus
+                       required />
+            </div>
+
+            <div class="auth-form-group">
+                <label for="register-password" class="auth-form-label">
+                    Password
+                </label>
+
+                <input id="register-password"
+                       name="Password"
+                       type="password"
+                       class="auth-form-control"
+                       autocomplete="new-password"
+                       minlength="10"
+                       required />
+            </div>
+            
+            <div class="auth-form-group">
+                <label for="register-confirm-password"
+                       class="auth-form-label">
+                    Confirm password
+                </label>
+
+                <input id="register-confirm-password"
+                       name="ConfirmPassword"
+                       type="password"
+                       class="auth-form-control"
+                       autocomplete="new-password"
+                       minlength="10"
+                       required />
+            </div>
+            
+            <button type="submit" class="auth-form-btn">
+                Register
+            </button>
+
+            @if (!string.IsNullOrWhiteSpace(Error))
+            {
+                <div class="login-alert">
+                    @Error
+                </div>
+            }
+        </form>
+
+        <p class="auth-alt-link">
+            Already registered?
+            <a href="/login">Log in</a>
+        </p>
     </div>
-}
 
-<form method="post" action="/auth/register">
-    <AntiforgeryToken />
-
-    <div class="mb-3">
-        <label for="register-email" class="form-label">
-            Email
-        </label>
-
-        <input id="register-email"
-               name="Email"
-               type="email"
-               class="form-control"
-               autocomplete="email"
-               required />
-    </div>
-
-    <div class="mb-3">
-        <label for="register-password" class="form-label">
-            Password
-        </label>
-
-        <input id="register-password"
-               name="Password"
-               type="password"
-               class="form-control"
-               autocomplete="new-password"
-               minlength="10"
-               required />
-    </div>
-
-    <div class="mb-3">
-        <label for="register-confirm-password"
-               class="form-label">
-            Confirm password
-        </label>
-
-        <input id="register-confirm-password"
-               name="ConfirmPassword"
-               type="password"
-               class="form-control"
-               autocomplete="new-password"
-               minlength="10"
-               required />
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Register
-    </button>
-</form>
-
-<p class="mt-3">
-    Already registered?
-    <a href="/login">Log in</a>
-</p>
+</div>s
 
 @code {
     [SupplyParameterFromQuery]
     public string? Error { get; set; }
+    
 }

@@ -4,69 +4,69 @@
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
+<div class="auth-page">
+    
+    <div class="auth-form">
+        <h1 href="/" class="auth-title" aria-hidden="true" style="color: var(--action-color)">
+            <span class="logo-icon" style="background-color: var(--action-color); scale: 180%"></span>
+            Meal & Recipe
+        </h1>
+        
+        <h2 style="font-weight: bold;">Login</h2>
 
-@if (!string.IsNullOrWhiteSpace(Error))
-{
-    <div class="alert alert-danger">
-        @Error
+        <form method="post" action="/auth/login">
+            <AntiforgeryToken/>
+
+            <input type="hidden"
+                   name="ReturnUrl"
+                   value="@ReturnUrl"/>
+
+            <div class="auth-form-group">
+                <label for="login-email" class="auth-form-label">
+                    Email
+                </label>
+
+                <input id="login-email"
+                       name="Email"
+                       type="email"
+                       class="auth-form-control"
+                       autocomplete="email"
+                       autofocus
+                       required/>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="login-password" class="auth-form-label">
+                    Password
+                </label>
+
+                <input id="login-password"
+                       name="Password"
+                       type="password"
+                       class="auth-form-control"
+                       autocomplete="current-password"
+                       required/>
+            </div>
+
+            <button type="submit" class="auth-form-btn">
+                Log in
+            </button>
+
+            @if (!string.IsNullOrWhiteSpace(Error))
+            {
+                <div class="login-alert">
+                    @Error
+                </div>
+            }
+        </form>
+
+        <p class="auth-alt-link">
+            Don't have an account?
+            <a href="/register">Register</a>
+        </p>
     </div>
-}
 
-<form method="post" action="/auth/login">
-    <AntiforgeryToken />
-
-    <input type="hidden"
-           name="ReturnUrl"
-           value="@ReturnUrl" />
-
-    <div class="mb-3">
-        <label for="login-email" class="form-label">
-            Email
-        </label>
-
-        <input id="login-email"
-               name="Email"
-               type="email"
-               class="form-control"
-               autocomplete="email"
-               required />
-    </div>
-
-    <div class="mb-3">
-        <label for="login-password" class="form-label">
-            Password
-        </label>
-
-        <input id="login-password"
-               name="Password"
-               type="password"
-               class="form-control"
-               autocomplete="current-password"
-               required />
-    </div>
-
-    <div class="form-check mb-3">
-        <input id="remember-me"
-               name="RememberMe"
-               type="checkbox"
-               value="true"
-               class="form-check-input" />
-
-        <label for="remember-me" class="form-check-label">
-            Remember me
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Log in
-    </button>
-</form>
-
-<p class="mt-3">
-    Don't have an account?
-    <a href="/register">Register</a>
-</p>
+</div>
 
 @code {
     [SupplyParameterFromQuery]
@@ -74,6 +74,5 @@
 
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
-
-
+    
 }
