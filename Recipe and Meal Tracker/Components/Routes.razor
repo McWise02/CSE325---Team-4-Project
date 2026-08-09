@@ -8,11 +8,7 @@
                             DefaultLayout="typeof(Layout.MainLayout)">
 
             <NotAuthorized>
-                <div class="alert alert-warning">
-                    You must log in to view this page.
-                </div>
-
-                <a href="/login">Log in</a>
+                <RedirectToLandingPage />
             </NotAuthorized>
 
         </AuthorizeRouteView>

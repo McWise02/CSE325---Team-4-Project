@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using RecipeAndMealTracker.Data;
 
 namespace RecipeAndMealTracker.Models;
 
@@ -29,4 +30,10 @@ public class MealEntry
     public bool IsEaten { get; set; } = false;
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+    [Required]
+    public string UserId { get; set; } = string.Empty;
+
+    [ForeignKey(nameof(UserId))]
+    public ApplicationUser? User { get; set; }
 }

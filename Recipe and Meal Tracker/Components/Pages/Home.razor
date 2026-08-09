@@ -1,9 +1,142 @@
-﻿@page "/"
+﻿
+@page "/"
+@layout HomePageLayout
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @attribute [AllowAnonymous]
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Meal & Recipe</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-page">
 
-Welcome to your new app.
+    <header class="home-header">
+        <a href="/" class="home-logo">
+            <span class="logo-icon"></span>
+            Meal & Recipe
+        </a>
+
+        <div class="home-nav">
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/dashboard" class="home-btn home-btn-primary">
+                        Dashboard
+                    </a>
+                </Authorized>
+
+                <NotAuthorized>
+                    <a href="/login" class="home-btn home-btn-secondary">
+                        Login
+                    </a>
+
+                    <a href="/register" class="home-btn home-btn-primary">
+                        Register
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </header>
+
+    <main class="home-content">
+
+        <section class="hero">
+            <div class="hero-text">
+                <h1>
+                    Plan your meals.<br />
+                    Keep recipes organised.<br />
+                    Shop smarter.
+                </h1>
+
+                <p>
+                    Meal & Recipe makes it easy to organise your recipes,
+                    plan your daily meals, and create grocery lists all
+                    in one place.
+                </p>
+
+                <AuthorizeView>
+                    <Authorized>
+                        <a href="/dashboard" class="hero-btn">
+                            Go to Dashboard
+                        </a>
+                    </Authorized>
+
+                    <NotAuthorized>
+                        <div class="hero-actions">
+                            <a href="/register" class="hero-btn">
+                                Get Started
+                            </a>
+
+                            <a href="/login" class="hero-login">
+                                I already have an account
+                            </a>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+
+            <div class="hero-card">
+                <span class="logo-icon hero-logo-icon"></span>
+
+                <h2>Meal & Recipe</h2>
+
+                <p>
+                    Everything you need to organise your meals
+                    in one simple app.
+                </p>
+            </div>
+        </section>
+
+        <section class="features">
+
+            <div class="feature-card">
+                <div class="feature-icon">🍽️</div>
+
+                <h2>Track Your Meals</h2>
+
+                <p>
+                    Plan what you're having for breakfast, lunch,
+                    and dinner. Keep track of your meals each day
+                    and mark them as eaten.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📖</div>
+
+                <h2>Save Your Recipes</h2>
+
+                <p>
+                    Keep your favourite recipes together in one place.
+                    Store the ingredients and information you need
+                    whenever it's time to cook.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🛒</div>
+
+                <h2>Create Grocery Lists</h2>
+
+                <p>
+                    Create grocery lists for the ingredients you need.
+                    Keep your shopping organised and make preparing
+                    your meals easier.
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="home-footer">
+        <span class="footer-brand">
+            <span class="logo-icon footer-logo-icon"></span>
+            Meal & Recipe
+        </span>
+
+        <span>
+            &copy; @DateTime.Now.Year Meal & Recipe
+        </span>
+    </footer>
+
+</div>
+

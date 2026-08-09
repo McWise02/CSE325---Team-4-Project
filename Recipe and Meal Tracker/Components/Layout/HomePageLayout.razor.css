@@ -1,0 +1,133 @@
+.home-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7f7f7;
+}
+
+/* Header */
+
+.site-header {
+    background-image: linear-gradient(
+        90deg,
+        rgb(5, 39, 103) 0%,
+        #3a0647 100%
+    );
+
+    color: white;
+    padding: 0 2rem;
+}
+
+.header-content {
+    max-width: 1200px;
+    height: 4.5rem;
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.site-title {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.site-title:hover {
+    color: white;
+}
+
+/* Header buttons */
+
+.header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-login,
+.btn-dashboard {
+    color: white;
+    border: 1px solid white;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+}
+
+.btn-login:hover,
+.btn-dashboard:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.btn-register {
+    color: rgb(5, 39, 103);
+    background-color: white;
+    border: 1px solid white;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+}
+
+.btn-register:hover {
+    background-color: #eeeeee;
+    color: rgb(5, 39, 103);
+}
+
+/* Main page content */
+
+main {
+    flex: 1;
+    width: 100%;
+}
+
+/* Footer */
+
+.site-footer {
+    background-color: rgb(5, 39, 103);
+    color: white;
+    padding: 1.25rem 2rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 0.9rem;
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+
+    .site-header {
+        padding: 0 1rem;
+    }
+
+    .site-title {
+        font-size: 1.1rem;
+    }
+
+    .header-buttons {
+        gap: 0.4rem;
+    }
+
+    .btn-login,
+    .btn-register,
+    .btn-dashboard {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.9rem;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}

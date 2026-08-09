@@ -1,15 +1,240 @@
 ﻿@page "/dashboard"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using RecipeAndMealTracker.Models
+@using RecipeAndMealTracker.Data
 
-<h3>Dashboard</h3>
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject AppDbContext DbContext
 
-<AuthorizeView>
-    <Authorized Context="auth">
-        <span>Welcome, @auth.User.Identity?.Name!</span>
-        
-    </Authorized>
-</AuthorizeView> 
+<PageTitle>Welcome</PageTitle>
+
+<div class="welcome-page">
+
+    <div class="welcome-header">
+        <div>
+            <h1>Welcome, @DisplayName</h1>
+            <p>Here's your meal plan for today.</p>
+        </div>
+
+        <div class="date-time-box">
+            <div class="date">@CurrentDateTime.ToString("dddd, dd MMMM yyyy")</div>
+            <div class="time">@CurrentDateTime.ToString("HH:mm")</div>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-box">
+            Loading today's meals...
+        </div>
+    }
+    else
+    {
+        <div class="meals-box">
+
+            <section class="meal-section">
+                <div class="meal-heading">
+                    <span class="meal-icon">☀️</span>
+                    <h2>Breakfast</h2>
+                </div>
+
+                @if (BreakfastMeals.Count == 0)
+                {
+                    <div class="empty-meal">
+                        No breakfast planned.
+                    </div>
+                    <NavLink class="add-meal-link" href="/planner">
+                        Click Here to plan your meals!
+                    </NavLink>
+                }
+                else
+                {
+                    @foreach (var meal in BreakfastMeals)
+                    {
+                        <div class="meal-item">
+                            <div>
+                                <strong>@GetRecipeName(meal)</strong>
+
+                                @if (meal.IsEaten)
+                                {
+                                    <span class="eaten-badge">Eaten</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </section>
+
+            <section class="meal-section">
+                <div class="meal-heading">
+                    <span class="meal-icon">🥪</span>
+                    <h2>Lunch</h2>
+                </div>
+
+                @if (LunchMeals.Count == 0)
+                {
+                    <div class="empty-meal">
+                        No lunch planned.
+                    </div>
+                    <NavLink class="add-meal-link" href="/planner">
+                        Click Here to plan your meals!
+                    </NavLink>
+                }
+                else
+                {
+                    @foreach (var meal in LunchMeals)
+                    {
+                        <div class="meal-item">
+                            <div>
+                                <strong>@GetRecipeName(meal)</strong>
+
+                                @if (meal.IsEaten)
+                                {
+                                    <span class="eaten-badge">Eaten</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </section>
+
+            <section class="meal-section">
+                <div class="meal-heading">
+                    <span class="meal-icon">🌙</span>
+                    <h2>Dinner</h2>
+                </div>
+
+                @if (DinnerMeals.Count == 0)
+                {
+                    <div class="empty-meal">
+                        No dinner planned.
+                    </div>
+                    <NavLink class="add-meal-link" href="/planner">
+                        Click Here to plan your meals!
+                    </NavLink>
+                }
+                else
+                {
+                    @foreach (var meal in DinnerMeals)
+                    {
+                        <div class="meal-item">
+                            <div>
+                                <strong>@GetRecipeName(meal)</strong>
+
+                                @if (meal.IsEaten)
+                                {
+                                    <span class="eaten-badge">Eaten</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </section>
+
+        </div>
+    }
+
+    <div class="action-row">
+
+        <a class="dashboard-card" href="/recipes/random">
+            <div class="card-icon">🎲</div>
+            <div>
+                <h3>Random Recipes</h3>
+                <p>Not sure what to cook? Find something new.</p>
+            </div>
+        </a>
+
+        <a class="dashboard-card" href="/shopping-list">
+            <div class="card-icon">🛒</div>
+            <div>
+                <h3>Buy Ingredients</h3>
+                <p>See what ingredients you need to pick up.</p>
+            </div>
+        </a>
+
+        <div class="dashboard-card">
+            <div class="card-icon">⚡</div>
+            <div>
+                <h3>Actions</h3>
+                <p>Manage your meals, recipes and meal plan.</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
 
 @code {
-    
+    private string DisplayName { get; set; } = "Friend";
+
+    private bool IsLoading { get; set; } = true;
+
+    private DateTime CurrentDateTime { get; set; } = DateTime.Now;
+
+    private List<MealEntry> BreakfastMeals { get; set; } = [];
+    private List<MealEntry> LunchMeals { get; set; } = [];
+    private List<MealEntry> DinnerMeals { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentDateTime = DateTime.Now;
+
+        var authState = await AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+
+        var principal = authState.User;
+
+        if (principal.Identity?.IsAuthenticated != true)
+        {
+            IsLoading = false;
+            return;
+        }
+
+        var user = await UserManager.GetUserAsync(principal);
+
+        if (user is null)
+        {
+            IsLoading = false;
+            return;
+        }
+
+        DisplayName = string.IsNullOrWhiteSpace(user.DisplayName)
+            ? "Friend"
+            : user.DisplayName;
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var meals = await DbContext.MealEntries
+            .AsNoTracking()
+            .Include(x => x.Recipe)
+            .Where(x =>
+                x.Date == today &&
+                x.UserId == user.Id)
+            .ToListAsync();
+
+        BreakfastMeals = meals
+            .Where(x => x.MealType == MealType.Breakfast)
+            .ToList();
+
+        LunchMeals = meals
+            .Where(x => x.MealType == MealType.Lunch)
+            .ToList();
+
+        DinnerMeals = meals
+            .Where(x => x.MealType == MealType.Dinner)
+            .ToList();
+
+        IsLoading = false;
+    }
+
+    private static string GetRecipeName(MealEntry meal)
+    {
+        return meal.Recipe?.Name ?? $"Recipe #{meal.RecipeId}";
+    }
 }

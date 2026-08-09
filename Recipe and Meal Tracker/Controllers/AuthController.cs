@@ -26,12 +26,21 @@ public class AuthController : Controller
         [FromForm] RegisterRequest request)
     {
         var email = request.Email?.Trim();
+        var userName = request.UserName?.Trim();
+
 
         if (string.IsNullOrWhiteSpace(email))
         {
             return RedirectWithError(
                 "/register",
                 "Email is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            return RedirectWithError(
+                "/register",
+                "Username is required.");
         }
 
         if (string.IsNullOrWhiteSpace(request.Password))
@@ -164,6 +173,8 @@ public class AuthController : Controller
 public class RegisterRequest
 {
     public string? Email { get; set; }
+
+    public string? UserName { get; set; }
 
     public string? Password { get; set; }
 

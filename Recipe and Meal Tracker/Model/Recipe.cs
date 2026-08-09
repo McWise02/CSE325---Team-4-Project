@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RecipeAndMealTracker.Data;
-namespace RecipeAndMealTracker;
+namespace RecipeAndMealTracker.Models;
 
 public class Recipe
 {
