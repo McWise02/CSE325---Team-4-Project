@@ -147,14 +147,14 @@ public class AuthController : Controller
     {
         if (string.IsNullOrWhiteSpace(returnUrl))
         {
-            return "/";
+            return "/dashboard";
         }
 
         if (!returnUrl.StartsWith('/') ||
             returnUrl.StartsWith("//") ||
             returnUrl.StartsWith("/\\"))
         {
-            return "/";
+            return "/dashboard";
         }
 
         return returnUrl;

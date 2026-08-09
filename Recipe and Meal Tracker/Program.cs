@@ -70,8 +70,10 @@ builder.Services
 
 builder.Services
     .AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    ;
 
+builder.Services.AddHostedService<DatabaseInitializerService>();
 
 var app = builder.Build();
 
@@ -96,25 +98,24 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 
-
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var dbContext =
-        scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    try
-    {
-        await dbContext.Database.OpenConnectionAsync();
-
-        Console.WriteLine("✅ Connection to Azure SQL succeeded!");
-
-        await dbContext.Database.CloseConnectionAsync();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("❌ Azure SQL connection failed:");
-        Console.WriteLine(ex.ToString());
-    }
-}
+// await using (var scope = app.Services.CreateAsyncScope())
+// {
+//     var dbContext =
+//         scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//
+//     try
+//     {
+//         await dbContext.Database.OpenConnectionAsync();
+//
+//         Console.WriteLine("✅ Connection to Azure SQL succeeded!");
+//
+//         await dbContext.Database.CloseConnectionAsync();
+//     }
+//     catch (Exception ex)
+//     {
+//         Console.WriteLine("❌ Azure SQL connection failed:");
+//         Console.WriteLine(ex.ToString());
+//     }
+// }
 
 app.Run();
