@@ -1,7 +1,303 @@
 ﻿@page "/planner"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using RecipeAndMealTracker
+@using RecipeAndMealTracker.Data
+@using RecipeAndMealTracker.Models
+@inject IDbContextFactory<AppDbContext> DbFactory
 
-<h3>Planner</h3>
+<h3>Meal Planner</h3>
+
+<div class="planner-toolbar">
+    <div class="view-toggle">
+        <button class="@ViewButtonClass(ViewMode.Day)" @onclick='() => SetView(ViewMode.Day)'>Day</button>
+        <button class="@ViewButtonClass(ViewMode.Week)" @onclick='() => SetView(ViewMode.Week)'>Week</button>
+        <button class="@ViewButtonClass(ViewMode.Month)" @onclick='() => SetView(ViewMode.Month)'>Month</button>
+    </div>
+
+    <div class="date-nav">
+        <button class="nav-btn" @onclick="GoPrevious" aria-label="Previous">&lsaquo;</button>
+        <span class="date-label">@CurrentLabel</span>
+        <button class="nav-btn" @onclick="GoNext" aria-label="Next">&rsaquo;</button>
+        <button class="today-btn" @onclick="GoToday">Today</button>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <p><em>Loading…</em></p>
+}
+else if (currentView == ViewMode.Day)
+{
+    <div class="day-view">
+        @foreach (var mealType in MealTypes)
+        {
+            <div class="day-row">
+                <div class="day-row-label">@mealType</div>
+                <div class="day-row-slots">
+                    @foreach (var entry in EntriesFor(referenceDate, mealType))
+                    {
+                        <div class="meal-chip @(entry.IsEaten ? "eaten" : "")">
+                            <span class="chip-name">@entry.Recipe?.Name</span>
+                            <button class="chip-toggle" title="Mark eaten" @onclick="() => ToggleEaten(entry)">✓</button>
+                            <button class="chip-remove" title="Remove" @onclick="() => RemoveEntry(entry)">×</button>
+                        </div>
+                    }
+                    <button class="add-chip" @onclick="() => OpenAddModal(referenceDate, mealType)">+ Add</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+else if (currentView == ViewMode.Week)
+{
+    var weekStart = StartOfWeek(referenceDate);
+    var weekDays = Enumerable.Range(0, 7).Select(i => weekStart.AddDays(i)).ToList();
+    var today = DateOnly.FromDateTime(DateTime.Today);
+
+    <div class="week-grid">
+        <div></div>
+        @foreach (var d in weekDays)
+        {
+            <div class="week-day-header @(d == today ? "is-today" : "")">
+                @d.ToString("ddd")<br /><span class="day-number">@d.Day</span>
+            </div>
+        }
+
+        @foreach (var mealType in MealTypes)
+        {
+            <div class="row-label">@mealType</div>
+            @foreach (var d in weekDays)
+            {
+                <div class="week-slot">
+                    @foreach (var entry in EntriesFor(d, mealType))
+                    {
+                        <div class="meal-chip @(entry.IsEaten ? "eaten" : "")">
+                            <span class="chip-name">@entry.Recipe?.Name</span>
+                            <button class="chip-toggle" title="Mark eaten" @onclick="() => ToggleEaten(entry)">✓</button>
+                            <button class="chip-remove" title="Remove" @onclick="() => RemoveEntry(entry)">×</button>
+                        </div>
+                    }
+                    <button class="add-slot" @onclick="() => OpenAddModal(d, mealType)">+</button>
+                </div>
+            }
+        }
+    </div>
+}
+else if (currentView == ViewMode.Month)
+{
+    var (monthGridStart, _) = VisibleRange;
+    var monthDays = Enumerable.Range(0, 42).Select(i => monthGridStart.AddDays(i)).ToList();
+    var today = DateOnly.FromDateTime(DateTime.Today);
+
+    <div class="month-grid">
+        @foreach (var dow in new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" })
+        {
+            <div class="month-dow">@dow</div>
+        }
+        @foreach (var d in monthDays)
+        {
+            var count = entries.Count(e => e.Date == d);
+            var inMonth = d.Month == referenceDate.Month;
+            <button class="month-cell @(inMonth ? "" : "outside-month") @(d == today ? "is-today" : "")"
+                    @onclick="() => JumpToDay(d)">
+                <span class="month-cell-number">@d.Day</span>
+                @if (count > 0)
+                {
+                    <span class="month-cell-badge">@count meal@(count == 1 ? "" : "s")</span>
+                }
+            </button>
+        }
+    </div>
+}
+
+@if (showAddModal)
+{
+    <div class="modal-backdrop" @onclick="CloseModal">
+        <div class="modal-card" @onclick:stopPropagation="true">
+            <h4>Add meal — @newEntryDate.ToString("MMM d") · @newEntryMealType</h4>
+
+            @if (recipes.Count == 0)
+            {
+                <p><em>No recipes yet. Add a recipe first, then come back here.</em></p>
+            }
+            else
+            {
+                <label>
+                    Recipe
+                    <select @bind="newEntryRecipeId">
+                        <option value="0">Select a recipe…</option>
+                        @foreach (var r in recipes)
+                        {
+                            <option value="@r.Id">@r.Name</option>
+                        }
+                    </select>
+                </label>
+            }
+
+            <div class="modal-actions">
+                <button class="btn-secondary" @onclick="CloseModal">Cancel</button>
+                <button class="btn-primary" @onclick="SaveNewEntry" disabled="@(newEntryRecipeId == 0)">Add</button>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
-    
+    private enum ViewMode { Day, Week, Month }
+
+    private ViewMode currentView = ViewMode.Week;
+    private DateOnly referenceDate = DateOnly.FromDateTime(DateTime.Today);
+    private bool isLoading = true;
+
+    private List<MealEntry> entries = new();
+    private List<Recipe> recipes = new();
+
+    private static readonly MealType[] MealTypes = { MealType.Breakfast, MealType.Lunch, MealType.Dinner };
+
+    private bool showAddModal;
+    private DateOnly newEntryDate;
+    private MealType newEntryMealType;
+    private int newEntryRecipeId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        recipes = await context.Recipes.OrderBy(r => r.Name).ToListAsync();
+        await LoadEntriesAsync();
+    }
+
+    private (DateOnly start, DateOnly end) VisibleRange => currentView switch
+    {
+        ViewMode.Day => (referenceDate, referenceDate),
+        ViewMode.Week => (StartOfWeek(referenceDate), StartOfWeek(referenceDate).AddDays(6)),
+        ViewMode.Month => (StartOfWeek(new DateOnly(referenceDate.Year, referenceDate.Month, 1)),
+                            StartOfWeek(new DateOnly(referenceDate.Year, referenceDate.Month, 1)).AddDays(41)),
+        _ => (referenceDate, referenceDate)
+    };
+
+    private async Task LoadEntriesAsync()
+    {
+        isLoading = true;
+        var (start, end) = VisibleRange;
+
+        await using var context = await DbFactory.CreateDbContextAsync();
+        entries = await context.MealEntries
+            .Include(m => m.Recipe)
+            .Where(m => m.Date >= start && m.Date <= end)
+            .ToListAsync();
+
+        isLoading = false;
+    }
+
+    private static DateOnly StartOfWeek(DateOnly date)
+    {
+        int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return date.AddDays(-diff);
+    }
+
+    private string CurrentLabel => currentView switch
+    {
+        ViewMode.Day => referenceDate.ToString("dddd, MMM d, yyyy"),
+        ViewMode.Week => $"{VisibleRange.start:MMM d} – {VisibleRange.end:MMM d, yyyy}",
+        ViewMode.Month => referenceDate.ToString("MMMM yyyy"),
+        _ => ""
+    };
+
+    private string ViewButtonClass(ViewMode mode) => mode == currentView ? "view-btn active" : "view-btn";
+
+    private async Task SetView(ViewMode mode)
+    {
+        currentView = mode;
+        await LoadEntriesAsync();
+    }
+
+    private async Task GoPrevious()
+    {
+        referenceDate = currentView switch
+        {
+            ViewMode.Day => referenceDate.AddDays(-1),
+            ViewMode.Week => referenceDate.AddDays(-7),
+            ViewMode.Month => referenceDate.AddMonths(-1),
+            _ => referenceDate
+        };
+        await LoadEntriesAsync();
+    }
+
+    private async Task GoNext()
+    {
+        referenceDate = currentView switch
+        {
+            ViewMode.Day => referenceDate.AddDays(1),
+            ViewMode.Week => referenceDate.AddDays(7),
+            ViewMode.Month => referenceDate.AddMonths(1),
+            _ => referenceDate
+        };
+        await LoadEntriesAsync();
+    }
+
+    private async Task GoToday()
+    {
+        referenceDate = DateOnly.FromDateTime(DateTime.Today);
+        await LoadEntriesAsync();
+    }
+
+    private List<MealEntry> EntriesFor(DateOnly date, MealType mealType) =>
+        entries.Where(e => e.Date == date && e.MealType == mealType).ToList();
+
+    private void OpenAddModal(DateOnly date, MealType mealType)
+    {
+        newEntryDate = date;
+        newEntryMealType = mealType;
+        newEntryRecipeId = 0;
+        showAddModal = true;
+    }
+
+    private void CloseModal() => showAddModal = false;
+
+    private async Task SaveNewEntry()
+    {
+        if (newEntryRecipeId == 0) return;
+
+        await using var context = await DbFactory.CreateDbContextAsync();
+        context.MealEntries.Add(new MealEntry
+        {
+            Date = newEntryDate,
+            MealType = newEntryMealType,
+            RecipeId = newEntryRecipeId
+        });
+        await context.SaveChangesAsync();
+
+        showAddModal = false;
+        await LoadEntriesAsync();
+    }
+
+    private async Task ToggleEaten(MealEntry entry)
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var tracked = await context.MealEntries.FindAsync(entry.Id);
+        if (tracked is null) return;
+
+        tracked.IsEaten = !tracked.IsEaten;
+        await context.SaveChangesAsync();
+        await LoadEntriesAsync();
+    }
+
+    private async Task RemoveEntry(MealEntry entry)
+    {
+        await using var context = await DbFactory.CreateDbContextAsync();
+        var tracked = await context.MealEntries.FindAsync(entry.Id);
+        if (tracked is null) return;
+
+        context.MealEntries.Remove(tracked);
+        await context.SaveChangesAsync();
+        await LoadEntriesAsync();
+    }
+
+    private async Task JumpToDay(DateOnly date)
+    {
+        referenceDate = date;
+        currentView = ViewMode.Day;
+        await LoadEntriesAsync();
+    }
 }
