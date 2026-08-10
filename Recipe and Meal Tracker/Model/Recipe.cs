@@ -19,4 +19,6 @@ public class Recipe
 
     [ForeignKey(nameof(CreatedById))]
     public ApplicationUser? CreatedBy { get; set; }
+
+    public List<Ingredient> Ingredients { get; set; } = [];
 }

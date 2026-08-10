@@ -1,0 +1,290 @@
+
+@page "/grocery-list"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using RecipeAndMealTracker.Models
+@using RecipeAndMealTracker.Data
+
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject AppDbContext DbContext
+
+<PageTitle>Grocery List</PageTitle>
+
+<div class="grocery-page">
+
+    <div class="grocery-header">
+        <div>
+            <h1>Grocery List Generator</h1>
+            <p>
+                Generate a grocery list based on your planned meals.
+            </p>
+        </div>
+
+        <div class="grocery-actions">
+            <button class="btn-primary"
+                    @onclick="GenerateToday">
+                Generate Today's Grocery List
+            </button>
+
+            <button class="btn-secondary"
+                    @onclick="OpenDateModal">
+                Custom Date
+            </button>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="empty-list">
+            Generating grocery list...
+        </div>
+    }
+    else if (!HasGeneratedList)
+    {
+        <div class="empty-list">
+            <h3>Your grocery list is empty</h3>
+
+            <p>
+                Choose today's grocery list or select a custom date.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="selected-date">
+            Grocery list for
+            <strong>@SelectedDate.ToString("dddd, dd MMMM yyyy")</strong>
+        </div>
+
+        @if (GroceryItems.Count == 0)
+        {
+            <div class="empty-list">
+                <h3>No ingredients found</h3>
+
+                <p>
+                    There are no planned meals for this date.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="grocery-list">
+
+                <div class="grocery-table-header">
+                    <span>Ingredient</span>
+                    <span>Amount</span>
+                    <span>Unit</span>
+                    <span>Price</span>
+                    <span>Recipe</span>
+                    <span>Meal</span>
+                </div>
+
+                @foreach (var item in GroceryItems)
+                {
+                    <div class="grocery-row">
+                        <span>@item.Name</span>
+
+                        <span>
+                            @item.Amount
+                        </span>
+
+                        <span>
+                            @item.Unit
+                        </span>
+
+                        <span>
+                            £@item.Price.ToString("0.00")
+                        </span>
+                        <span>
+                            @item.RecipeName
+                        </span>
+                        <span>
+                            @item.MealName
+                        </span>
+                    </div>
+                }
+
+                <div class="grocery-total">
+                    <span>Total</span>
+
+                    <strong>
+                        £@TotalPrice.ToString("0.00")
+                    </strong>
+                </div>
+
+            </div>
+        }
+    }
+
+</div>
+
+
+@if (ShowDateModal)
+{
+    <div class="modal-backdrop">
+
+        <div class="modal-card">
+
+            <h2>Select a Date</h2>
+
+            <label>
+                Date
+
+                <InputDate @bind-Value="CustomDate"
+                           class="date-input" />
+            </label>
+
+            <div class="modal-actions">
+
+                <button class="btn-secondary"
+                        @onclick="CloseDateModal">
+                    Cancel
+                </button>
+
+                <button class="btn-primary"
+                        @onclick="GenerateCustomDate">
+                    Generate
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+
+@code {
+
+    private bool IsLoading { get; set; }
+
+    private bool HasGeneratedList { get; set; }
+
+    private bool ShowDateModal { get; set; }
+
+    private DateTime CustomDate { get; set; } = DateTime.Today;
+
+    private DateOnly SelectedDate { get; set; }
+
+    private List<GroceryItem> GroceryItems { get; set; } = [];
+
+
+    private decimal TotalPrice =>
+        GroceryItems.Sum(x => x.Price);
+
+
+    private async Task GenerateToday()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        await GenerateList(today);
+    }
+
+
+    private void OpenDateModal()
+    {
+        CustomDate = DateTime.Today;
+
+        ShowDateModal = true;
+    }
+
+
+    private void CloseDateModal()
+    {
+        ShowDateModal = false;
+    }
+
+
+    private async Task GenerateCustomDate()
+    {
+        ShowDateModal = false;
+
+        var date = DateOnly.FromDateTime(CustomDate);
+
+        await GenerateList(date);
+    }
+
+
+    private async Task GenerateList(DateOnly date)
+    {
+        IsLoading = true;
+        HasGeneratedList = true;
+
+        SelectedDate = date;
+
+        GroceryItems.Clear();
+
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user =
+            await UserManager.GetUserAsync(authState.User);
+
+        if (user is null)
+        {
+            IsLoading = false;
+            return;
+        }
+
+        var meals = await DbContext.MealEntries
+            .AsNoTracking()
+            .Include(x => x.Recipe)
+                .ThenInclude(x => x!.Ingredients)
+                    .ThenInclude(x => x.Unit)
+            .Where(x =>
+                x.UserId == user.Id &&
+                x.Date == date)
+            .ToListAsync();
+
+
+        foreach (var meal in meals)
+        {
+            if (meal.Recipe is null)
+            {
+                continue;
+            }
+
+            foreach (var ingredient in meal.Recipe.Ingredients)
+            {
+                GroceryItems.Add(new GroceryItem
+                {
+                    Name = ingredient.Name,
+
+                    Amount = ingredient.Amount ?? 0,
+
+                    Unit = ingredient.Unit?.Name ?? "",
+
+                    Price = ingredient.Price ?? 0,
+                    RecipeName = meal.Recipe.Name,
+                    MealName = meal.MealType.ToString()
+                });
+            }
+        }
+
+        IsLoading = false;
+    }
+
+
+    private class GroceryItem
+    {
+        public string Name { get; set; } = string.Empty;
+
+        public double Amount { get; set; }
+
+        public string Unit { get; set; } = string.Empty;
+
+        public decimal Price { get; set; }
+
+        public string RecipeName { get; set; } = string.Empty;
+
+        public string MealName { get; set; } = string.Empty;
+    }
+}
+

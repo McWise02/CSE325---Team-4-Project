@@ -4,6 +4,38 @@ Akuegbo Iheanyi Ejeagba
 Micah Brown
 Daniel Ayvazyan
 
+
+tester@test.com
+
+TestPassword!23
+
+
+seeding:
+
+if (args.Contains("--seed"))
+{
+    using var scope = app.Services.CreateScope();
+
+    var services = scope.ServiceProvider;
+
+    var db = services.GetRequiredService<AppDbContext>();
+
+    var userManager =
+        services.GetRequiredService<UserManager<ApplicationUser>>();
+
+    // Apply migrations first.
+    await db.Database.MigrateAsync();
+
+    // Seed the database.
+    await DatabaseSeeder.SeedAsync(
+        db,
+        userManager);
+
+    return;
+}
+
+
+
 AI Generated Project Ideas:
 
 1. Campus Event Management Portal ⭐⭐⭐⭐⭐
