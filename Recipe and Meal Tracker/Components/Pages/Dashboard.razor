@@ -12,20 +12,19 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject AppDbContext DbContext
 
-<PageTitle>Welcome</PageTitle>
+<PageTitle>Dashboard</PageTitle>
 
-<div class="welcome-page">
-
-    <div class="welcome-header">
-        <div>
-            <h1>Welcome, @DisplayName</h1>
-            <p>Here's your meal plan for today.</p>
-        </div>
-
-        <div class="date-time-box">
-            <div class="date">@CurrentDateTime.ToString("dddd, dd MMMM yyyy")</div>
-            <div class="time">@CurrentDateTime.ToString("HH:mm")</div>
-        </div>
+<div class="dashboard">
+    
+    <div class="welcome-title">
+        <h1>Welcome, @DisplayName</h1>
+        <p>Here's your meal plan for today.</p>
+    </div>
+    
+    <div class="date-time-box">
+        <div class="date-weekday">@CurrentDateTime.ToString("dddd")</div>
+        <div class="time">@CurrentDateTime.ToString("HH:mm")</div>
+        <div class="date-full">@CurrentDateTime.ToString("dd MMM yyyy")</div>
     </div>
 
     @if (IsLoading)
@@ -40,11 +39,16 @@
 
             <section class="meal-section">
                 <div class="meal-heading">
-                    <span class="meal-icon">☀️</span>
                     <h2>Breakfast</h2>
                 </div>
 
-                @if (BreakfastMeals.Count == 0)
+                @if (IsLoading)
+                {
+                    <div class="empty-meal">
+                        Loading Breakfast...
+                    </div>
+                }
+                else if (BreakfastMeals.Count == 0)
                 {
                     <div class="empty-meal">
                         No breakfast planned.
@@ -73,11 +77,16 @@
 
             <section class="meal-section">
                 <div class="meal-heading">
-                    <span class="meal-icon">🥪</span>
                     <h2>Lunch</h2>
                 </div>
 
-                @if (LunchMeals.Count == 0)
+                @if (IsLoading)
+                {
+                    <div class="empty-meal">
+                        Loading Lunch...
+                    </div>
+                }
+                else if (LunchMeals.Count == 0)
                 {
                     <div class="empty-meal">
                         No lunch planned.
@@ -106,11 +115,16 @@
 
             <section class="meal-section">
                 <div class="meal-heading">
-                    <span class="meal-icon">🌙</span>
                     <h2>Dinner</h2>
                 </div>
 
-                @if (DinnerMeals.Count == 0)
+                @if (IsLoading)
+                {
+                    <div class="empty-meal">
+                        Loading Dinner...
+                    </div>
+                }
+                else if (DinnerMeals.Count == 0)
                 {
                     <div class="empty-meal">
                         No dinner planned.
@@ -139,7 +153,11 @@
 
         </div>
     }
-
+    
+    <div class="recipe-suggestions">
+        <h2>Suggested Recipes</h2>
+    </div>
+    
     <div class="action-row">
 
         <a class="dashboard-card" href="/recipes/random">

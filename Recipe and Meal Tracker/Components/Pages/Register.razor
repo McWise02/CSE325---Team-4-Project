@@ -6,17 +6,19 @@
 
 <div class="auth-page">
     
-    <div class="auth-form">
+    <div class="auth-form-container">
         <h1 href="/" class="auth-title" aria-hidden="true" style="color: var(--action-color)">
             <span class="logo-icon" style="background-color: var(--action-color); scale: 180%"></span>
             Meal & Recipe
         </h1>
         
-        <h2 style="font-weight: bold;">Register</h2>
+        
 
         <form method="post" action="/auth/register">
             <AntiforgeryToken/>
 
+            <h2 style="font-weight: bold; color: var(--action-color)">Register</h2>
+            
             <div class="auth-form-group">
                 <label for="register-email" class="auth-form-label">
                     Email
@@ -84,12 +86,13 @@
                     @Error
                 </div>
             }
+            
+            <p class="auth-alt-link">
+                Already registered?
+                <a href="/login">Log in</a>
+            </p>
         </form>
-
-        <p class="auth-alt-link">
-            Already registered?
-            <a href="/login">Log in</a>
-        </p>
+        
     </div>
 
 </div>s

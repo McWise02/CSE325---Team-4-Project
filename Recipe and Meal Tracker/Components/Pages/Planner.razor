@@ -1,10 +1,12 @@
 ﻿@page "/planner"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using RecipeAndMealTracker
 @using RecipeAndMealTracker.Data
 @using RecipeAndMealTracker.Models
 @inject IDbContextFactory<AppDbContext> DbFactory
+@attribute [Authorize]
 
 <h3>Meal Planner</h3>
 

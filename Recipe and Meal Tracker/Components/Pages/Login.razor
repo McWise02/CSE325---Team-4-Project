@@ -6,16 +6,15 @@
 
 <div class="auth-page">
     
-    <div class="auth-form">
+    <div class="auth-form-container">
         <h1 href="/" class="auth-title" aria-hidden="true" style="color: var(--action-color)">
             <span class="logo-icon" style="background-color: var(--action-color); scale: 180%"></span>
             Meal & Recipe
         </h1>
-        
-        <h2 style="font-weight: bold;">Login</h2>
 
         <form method="post" action="/auth/login">
             <AntiforgeryToken/>
+            <h2 style="font-weight: bold; color: var(--action-color)">Login</h2>
 
             <input type="hidden"
                    name="ReturnUrl"
@@ -58,12 +57,12 @@
                     @Error
                 </div>
             }
+            
+            <p class="auth-alt-link">
+                Don't have an account?
+                <a href="/register">Register</a>
+            </p>
         </form>
-
-        <p class="auth-alt-link">
-            Don't have an account?
-            <a href="/register">Register</a>
-        </p>
     </div>
 
 </div>

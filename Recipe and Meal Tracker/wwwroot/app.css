@@ -4,6 +4,7 @@
     --action-color: #2B3B29;
     --accent-color: #F1F3E0;
     --dark-text-color: black;
+    --background-color: white;
     font-family: 'Montserrat', sans-serif;
 }
 
@@ -21,9 +22,15 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    width: 100%;
+}
+
+.content {
+    /*padding: 5rem;*/
 }
 
 .content-container footer {
+    border-top: 1px solid black;
     max-height: 10%;
     flex: 1;
 }
@@ -32,7 +39,7 @@ body {
 
 .nav-container {
     background: var(--action-color);
-    width: 300px;
+    width: 380px;
     padding: 25px 10px;
     display: flex;
     flex-direction: column;
@@ -60,6 +67,10 @@ a.title-link {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+.nav-title {
+    margin-right: 15px;
 }
 
 .nc-link {
@@ -127,26 +138,39 @@ a.active {
     background-size: 256px 256px;
 }
 
-.auth-title {
-    display: flex;
-    align-items: center;
-    gap: 25px;    
-    font-weight: bold;
-    position: absolute;
-    top: 200px;
-    align-self: center;
-}
-
-.auth-form {
-    width: 600px;
+.auth-form-container {
+    width: 630px;
     grid-column: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--primaty-color);
     margin: 20px;
     border-radius: 10px;
     padding: 0 60px;
+    gap: 1rem;
+}
+
+.auth-title {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 25px;
+    align-self: center;
+    justify-content: center;
+    padding: 3rem 0;
+    font-weight: bold;
+    background-color: var(--background-color);
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.auth-form-container form {
+    background-color: var(--background-color);
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    padding: 2rem 3rem;
 }
 
 .auth-form-group {
@@ -158,6 +182,7 @@ a.active {
     font-weight: bold;
     margin-top: 5px;
     font-size: large;
+    color: var(--action-color);
 }
 
 .auth-form-control {
@@ -165,6 +190,7 @@ a.active {
     border: 3px solid #00000000;
     border-radius: 10px;
     transition: all ease-in-out 0.2s;
+    background-color: var(--accent-color);
 }
 
 .auth-form-control:focus {
@@ -173,7 +199,7 @@ a.active {
 }
 
 .auth-form-btn {
-    margin: 10px 0;
+    margin-top: 15px;
     padding: 5px 25px;
     border: 3px solid #00000000;
     border-radius: 10px;
@@ -195,6 +221,10 @@ a.active {
     background: #ff000050;
     border: 3px solid #ff000090;
     border-radius: 10px;
+}
+
+.auth-alt-link { 
+    margin-top: 10px;
 }
 
 /* SVG Icons */
@@ -296,6 +326,34 @@ a.active {
     mask-repeat: no-repeat;
 }
 
+.clipboard-icon {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background-color: var(--action-color);
+
+    -webkit-mask-image: url('./icons/clipboard-svgrepo-com.svg');
+    mask-image: url('./icons/clipboard-svgrepo-com.svg');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+.shopping-icon {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background-color: var(--action-color);
+
+    -webkit-mask-image: url('./icons/shopping-cart-svgrepo-com.svg');
+    mask-image: url('./icons/shopping-cart-svgrepo-com.svg');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
 /* Effects */
 
 .slide-underline {
@@ -319,3 +377,28 @@ a.active {
     transform: scaleX(1);
     transform-origin: left;
 }
+
+.slide-underline-text {
+    display: inline-block;
+    position: relative;
+    text-decoration: none;
+    /*font-size: 24px;*/
+}
+
+.slide-underline-text::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px; 
+    bottom: -2px; 
+    left: 0;
+    background-color: var(--accent-color); 
+    transform: scaleX(0); 
+    transform-origin: bottom left; 
+    transition: transform 0.3s ease-out; 
+}
+
+.slide-underline-text:hover::after {
+    transform: scaleX(1);
+}
+

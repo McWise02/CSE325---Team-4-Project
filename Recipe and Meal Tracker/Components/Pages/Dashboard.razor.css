@@ -1,22 +1,26 @@
 /* Dashboard */
 
-.welcome-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
+.dashboard {
+    padding: 2rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 300px;
+    grid-template-rows: fit-content(100%) 1fr 1fr 1fr;
 }
 
-.welcome-header h1 {
+.welcome-title {
+    grid-row: 1;
+    grid-column: 1/5;
+    padding: 15px;
+}
+
+.welcome-title h1 {
     margin: 0;
     color: var(--dark-text-color);
-    font-size: 28px;
+    font-size: 28px; 
     font-weight: 700;
 }
 
-.welcome-header p {
+.welcome-title p {
     margin: 5px 0 0;
     color: #6b6b6b;
 }
@@ -27,25 +31,31 @@
 .date-time-box {
     min-width: 220px;
     padding: 12px 18px;
+    margin: 15px;
 
     background: var(--secondary-color);
     border-radius: 10px;
 
     text-align: center;
     color: var(--action-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.date-time-box .date {
-    font-size: 13px;
-    font-weight: 600;
+.date-time-box .date-weekday {
+    font-size: 25px;
+    font-weight: 700;
+    /*margin-bottom: 10px;*/
 }
 
 .date-time-box .time {
-    margin-top: 2px;
-    font-size: 22px;
+    font-size: 60px;
     font-weight: 700;
+    line-height: 1.2;
 }
-
 
 /* Loading */
 
@@ -63,14 +73,20 @@
 /* Today's meals */
 
 .meals-box {
+    grid-row: 2;
+    grid-column: 1/4;
+    margin: 15px;
+    
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
 
-    border: 1px solid var(--secondary-color);
+    border: 1px solid #dedede;
     border-radius: 12px;
 
-    background: var(--accent-color);
+    background: white;
     overflow: hidden;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
 }
 
 
@@ -80,7 +96,7 @@
     min-height: 210px;
     padding: 20px;
 
-    border-right: 1px solid var(--secondary-color);
+    border-right: 1px solid #dedede;
 
     display: flex;
     flex-direction: column;
@@ -101,7 +117,7 @@
     margin-bottom: 16px;
     padding-bottom: 10px;
 
-    border-bottom: 1px solid var(--secondary-color);
+    border-bottom: 1px solid #dedede;
 }
 
 .meal-heading h2 {
@@ -192,6 +208,25 @@
     opacity: 0.8;
 }
 
+/* Recipe Suggestions*/
+
+.recipe-suggestions {
+    grid-row: 3/5;
+    grid-column: 1/3;
+    margin: 15px;
+    padding: 10px;
+
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    background: white;
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.recipe-suggestions h2 {
+    font-weight: bold;
+    font-size: 26px;
+}
 
 /* Bottom action cards */
 
