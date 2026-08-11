@@ -1,11 +1,15 @@
 ﻿@page "/planner"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
 @using RecipeAndMealTracker
 @using RecipeAndMealTracker.Data
 @using RecipeAndMealTracker.Models
 @inject IDbContextFactory<AppDbContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<ApplicationUser> UserManager
 @attribute [Authorize]
 
 <h3>Meal Planner</h3>
@@ -261,12 +265,17 @@ else if (currentView == ViewMode.Month)
     {
         if (newEntryRecipeId == 0) return;
 
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+        if (user is null) return;
+
         await using var context = await DbFactory.CreateDbContextAsync();
         context.MealEntries.Add(new MealEntry
         {
             Date = newEntryDate,
             MealType = newEntryMealType,
-            RecipeId = newEntryRecipeId
+            RecipeId = newEntryRecipeId,
+            UserId = user.Id
         });
         await context.SaveChangesAsync();
 

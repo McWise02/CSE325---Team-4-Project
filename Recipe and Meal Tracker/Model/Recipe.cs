@@ -21,4 +21,6 @@ public class Recipe
     public ApplicationUser? CreatedBy { get; set; }
 
     public List<Ingredient> Ingredients { get; set; } = [];
+
+    public
 }
