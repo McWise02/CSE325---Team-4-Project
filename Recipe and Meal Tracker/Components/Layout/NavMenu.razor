@@ -1,5 +1,5 @@
 ﻿<div class="nav-container">
-    <a href="/" class="title-link" aria-hidden="true">
+    <a href="/" class="title-link nav-title" aria-hidden="true">
         <span class="logo-icon"></span>
         Meal & Recipe
     </a>
@@ -17,15 +17,15 @@
             <span class="recipe-icon"></span>
             <span aria-hidden="true"></span> Recipes
         </NavLink>
-        <NavLink class="nc-link slide-underline" href="stock">
-            <span class="stock-icon"></span>
-            <span aria-hidden="true"></span> Stock
-        </NavLink>
+        @* <NavLink class="nc-link slide-underline" href="stock"> *@
+        @*     <span class="stock-icon"></span> *@
+        @*     <span aria-hidden="true"></span> Stock *@
+        @* </NavLink> *@
     </nav>
     
     <form class="nc-logout-form" method="post" action="/auth/logout">
         <AntiforgeryToken />
-        <button class="nc-logout-button" type="submit">Logout</button>
+        <button class="nc-logout-button" type="submit">Log out</button>
     </form>
 </div>
 

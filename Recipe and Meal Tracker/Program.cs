@@ -46,6 +46,13 @@ builder.Services
     })
     .AddIdentityCookies();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login"; 
+    
+    options.AccessDeniedPath = "/error"; 
+});
+
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {

@@ -23,6 +23,11 @@
   font-weight: 600;
   cursor: pointer;
   color: var(--action-color);
+  transition: background-color ease-in-out 0.3s;
+}
+
+.view-btn:hover {
+  background-color: var(--accent-color);
 }
 
 .view-btn.active {
