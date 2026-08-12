@@ -12,6 +12,9 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject AppDbContext DbContext
 
+@rendermode InteractiveServer
+@inject IJSRuntime JS
+
 <PageTitle>Dashboard</PageTitle>
 
 <div class="dashboard">
@@ -69,6 +72,7 @@
                                 {
                                     <span class="eaten-badge">Eaten</span>
                                 }
+
                             </div>
                         </div>
                     }
@@ -160,28 +164,61 @@
     
     <div class="action-row">
 
-        <a class="dashboard-card" href="/recipes/random">
-            <div class="card-icon">🎲</div>
+        <div class="grocery-card">
+            <div class="card-icon">📝</div>
             <div>
-                <h3>Random Recipes</h3>
-                <p>Not sure what to cook? Find something new.</p>
-            </div>
-        </a>
+                <h3>Grocery List for Today</h3>
 
-        <a class="dashboard-card" href="/grocery-list">
-            <div class="card-icon">🛒</div>
-            <div>
-                <h3>Buy Ingredients</h3>
-                <p>See what ingredients you need to pick up.</p>
-            </div>
-        </a>
+                @if (GroceryListLoading)
+                {
+                    <div class="empty-list">
+                        Generating grocery list...
+                    </div>
+                }
+                else if (!HasGeneratedList)
+                {
+                    <div class="empty-list">
+                        <h3>Your grocery list is empty</h3>
 
-        <div class="dashboard-card">
-            <div class="card-icon">⚡</div>
-            <div>
-                <h3>Actions</h3>
-                <p>Manage your meals, recipes and meal plan.</p>
+                        <p>
+                            Add a meal to today to have the grocery list populated.
+                        </p>
+                    </div>
+                }
+                else if (GroceryItems.Count == 0)
+                {
+                    <div class="empty-list">
+                        <h3>No ingredients found</h3>
+
+                        <p>
+                            There are no planned meals for today.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <div class="grocery-list">
+
+                        <div class="grocery-table-header">
+                            <span>Ingredient</span>
+                            <span>Amount</span>
+                        </div>
+
+                        @foreach (var item in GroceryItems)
+                        {
+                            <div class="grocery-row">
+                                <span>@item.Name</span>
+                                <span>@item.Amount</span>
+                            </div>
+                        }
+
+                        <button class="btn-primary" @onclick="CopyGroceryList">
+                            Copy Grocery list
+                        </button>
+                    </div>
+                }
             </div>
+
         </div>
 
     </div>
@@ -194,12 +231,13 @@
     private bool IsLoading { get; set; } = true;
 
     private DateTime CurrentDateTime { get; set; } = DateTime.Now;
-
+    private bool HasGeneratedList { get; set; }
     private List<MealEntry> BreakfastMeals { get; set; } = [];
     private List<MealEntry> LunchMeals { get; set; } = [];
     private List<MealEntry> DinnerMeals { get; set; } = [];
-    private List<Recipe> SuggestedRecipes { get; set; } = [];   
-
+    private List<Recipe> SuggestedRecipes { get; set; } = []; 
+    private List<GroceryItem> GroceryItems { get; set; } = []; 
+    private bool GroceryListLoading { get; set; } = true;
     protected override async Task OnInitializedAsync()
     {
         CurrentDateTime = DateTime.Now;
@@ -250,10 +288,107 @@
             .ToList();
 
         IsLoading = false;
+        await GenerateList(today);
     }
 
     private static string GetRecipeName(MealEntry meal)
     {
         return meal.Recipe?.Name ?? $"Recipe #{meal.RecipeId}";
     }
+
+    private async Task GenerateToday()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        await GenerateList(today);
+    }
+
+    private async Task CopyGroceryList()
+    {
+        if (GroceryItems.Count == 0) return;
+
+        var text = string.Join(Environment.NewLine,
+            GroceryItems.Select(x => $"{x.Name} - {x.Amount} {x.Unit}"));
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+    }
+
+        private async Task GenerateList(DateOnly date)
+    {
+        GroceryListLoading = true;
+        HasGeneratedList = true;
+
+        var SelectedDate = DateTime.Today;
+
+        GroceryItems.Clear();
+
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user =
+            await UserManager.GetUserAsync(authState.User);
+
+        if (user is null)
+        {
+            GroceryListLoading = false;
+            return;
+        }
+
+        var meals = await DbContext.MealEntries
+            .AsNoTracking()
+            .Include(x => x.Recipe)
+                .ThenInclude(x => x!.Ingredients)
+                    .ThenInclude(x => x.Unit)
+            .Where(x =>
+                x.UserId == user.Id &&
+                x.Date == date)
+            .ToListAsync();
+
+
+        foreach (var meal in meals)
+        {
+            if (meal.Recipe is null)
+            {
+                continue;
+            }
+
+            foreach (var ingredient in meal.Recipe.Ingredients)
+            {
+                GroceryItems.Add(new GroceryItem
+                {
+                    Name = ingredient.Name,
+
+                    Amount = Math.Round(ingredient.Amount ?? 0),
+
+                    Unit = ingredient.Unit?.Name ?? "",
+
+                    Price = ingredient.Price ?? 0,
+                    RecipeName = meal.Recipe.Name,
+                    MealName = meal.MealType.ToString()
+                });
+            }
+        }
+
+        Console.WriteLine($"GroceryItems count: {GroceryItems.Count}");
+
+        GroceryListLoading = false;
+    }
+
+        private class GroceryItem
+        {
+            public string Name { get; set; } = string.Empty;
+
+            public double Amount { get; set; }
+
+            public string Unit { get; set; } = string.Empty;
+
+            public decimal Price { get; set; }
+
+            public string RecipeName { get; set; } = string.Empty;
+
+            public string MealName { get; set; } = string.Empty;
+        }
+
+
+
+
 }
