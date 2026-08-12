@@ -275,8 +275,6 @@
     border-bottom: none;
 }
 
-
-
 /* Dashboard cards */
 
 .dashboard-card {
@@ -304,6 +302,9 @@
 }
 
 .grocery-card {
+    grid-row: 3/5;
+    grid-column: 3/4;
+    margin: 15px;
     min-height: 130px;
     padding: 18px;
 
@@ -328,6 +329,20 @@
         box-shadow 0.15s ease;
 }
 
+.grocery-btn {
+    display: inline-block;
+
+    padding: 0.8rem 1.6rem;
+
+    color: var(--accent-color);
+    background-color: var(--action-color);
+
+    border-radius: 10px;
+
+    font-weight: 600;
+    text-decoration: none;
+}
+
 .dashboard-card:hover {
     transform: translateY(-2px);
 
@@ -338,6 +353,40 @@
     color: var(--dark-text-color);
 }
 
+/* Action Buttons*/
+
+.action-btns {
+    grid-column: 4/5;
+    grid-row: 3/5;
+
+    margin: 15px;
+    padding: 15px;
+    
+    display: flex;
+    flex-direction: column;
+
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.action-btn {
+    display: inline-block;
+
+    padding: 0.8rem 1.6rem;
+    margin: 10px 0;
+
+    color: var(--accent-color);
+    background-color: var(--action-color);
+
+    border-radius: 10px;
+
+    font-weight: 600;
+    text-decoration: none;
+    
+    justify-self: center;
+}
 
 /* Action card icon */
 

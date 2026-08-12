@@ -158,12 +158,6 @@
         </div>
     }
     
-    <div class="recipe-suggestions">
-        <h2>Suggested Recipes</h2>
-    </div>
-    
-    <div class="action-row">
-
         <div class="grocery-card">
             <div class="card-icon">📝</div>
             <div>
@@ -212,8 +206,8 @@
                             </div>
                         }
 
-                        <button class="btn-primary" @onclick="CopyGroceryList">
-                            Copy Grocery list
+                        <button class="grocery-btn" @onclick="CopyGroceryList">
+                            <span class="slide-underline-text">Copy Grocery list</span>
                         </button>
                     </div>
                 }
@@ -221,8 +215,17 @@
 
         </div>
 
-    </div>
+    <div class="action-btns">
+        <h3>Quick Actions</h3>
 
+        <a href="/recipes/create" class="action-btn">
+            <span class="slide-underline-text">Create Recipe</span>
+        </a>
+        <a href="/planner" class="action-btn">
+            <span class="slide-underline-text">Plan Meal</span>
+        </a>
+    </div>
+        
 </div>
 
 @code {
