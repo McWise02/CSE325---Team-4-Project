@@ -1,0 +1,131 @@
+.recipe-detail-page {
+  padding: 2rem;
+  max-width: 700px;
+}
+
+.rd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.rd-back-link {
+  text-decoration: none;
+  color: var(--action-color);
+  font-weight: bold;
+}
+
+.rd-back-link:hover {
+  text-decoration: underline;
+}
+
+.rd-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  color: var(--accent-color);
+  background: var(--action-color);
+  border: 2px solid var(--action-color);
+  border-radius: 10px;
+  padding: 8px 18px;
+  transition: all 0.2s ease-in-out;
+}
+
+.rd-edit-btn .edit-recipe-icon {
+  background-color: var(--accent-color);
+  width: 18px;
+  height: 18px;
+}
+
+.rd-edit-btn:hover {
+  background: var(--accent-color);
+  color: var(--action-color);
+}
+
+.rd-edit-btn:hover .edit-recipe-icon {
+  background-color: var(--action-color);
+}
+
+.rd-card {
+  background-color: var(--accent-color);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.rd-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.rd-icon .recipe-icon {
+  width: 48px;
+  height: 48px;
+  background-color: var(--action-color);
+}
+
+.rd-name {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  color: var(--action-color);
+}
+
+.rd-meta {
+  text-align: center;
+  color: #555;
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.rd-section {
+  margin-top: 1.5rem;
+}
+
+.rd-section h4 {
+  margin: 0 0 0.5rem;
+  color: var(--action-color);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 0.25rem;
+}
+
+.rd-empty-section {
+  color: #777;
+  font-style: italic;
+}
+
+.rd-ingredient-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rd-ingredient-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.rd-ing-name {
+  font-weight: 500;
+}
+
+.rd-ing-amount {
+  color: #555;
+}
+
+.rd-instructions {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  color: #333;
+}
+
+.rd-empty {
+  color: #777;
+  font-style: italic;
+  padding: 2rem;
+}

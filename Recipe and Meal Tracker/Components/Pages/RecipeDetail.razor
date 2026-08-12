@@ -1,0 +1,96 @@
+@page "/recipes/{Id:int}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using RecipeAndMealTracker.Data
+@using RecipeAndMealTracker.Models
+@attribute [Authorize]
+@inject AppDbContext DbContext
+
+<div class="recipe-detail-page">
+    @if (_loading)
+    {
+        <p>Loading...</p>
+    }
+    else if (_recipe is null)
+    {
+        <p class="rd-empty">Recipe not found.</p>
+    }
+    else
+    {
+        <div class="rd-header">
+            <a class="rd-back-link" href="/recipes">&larr; Back to Recipes</a>
+            <a class="rd-edit-btn" href="@($"/recipes/{_recipe.Id}/edit")">
+                <span class="edit-recipe-icon"></span>
+                Edit
+            </a>
+        </div>
+
+        <div class="rd-card">
+            <div class="rd-icon">
+                <span class="recipe-icon"></span>
+            </div>
+
+            <h2 class="rd-name">@_recipe.Name</h2>
+            <p class="rd-meta">
+                @_recipe.Ingredients.Count ingredient@(_recipe.Ingredients.Count == 1 ? "" : "s")
+                &middot;
+                Added @_recipe.CreatedAtUtc.ToLocalTime().ToString("MMM d, yyyy")
+            </p>
+
+            <div class="rd-section">
+                <h4>Ingredients</h4>
+                @if (!_recipe.Ingredients.Any())
+                {
+                    <p class="rd-empty-section">No ingredients listed.</p>
+                }
+                else
+                {
+                    <ul class="rd-ingredient-list">
+                        @foreach (var ingredient in _recipe.Ingredients.OrderBy(i => i.Name))
+                        {
+                            <li>
+                                <span class="rd-ing-name">@ingredient.Name</span>
+                                @if (ingredient.Amount.HasValue)
+                                {
+                                    <span class="rd-ing-amount">
+                                        @ingredient.Amount @(ingredient.Unit?.Name)
+                                    </span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+
+            <div class="rd-section">
+                <h4>Instructions</h4>
+                @if (string.IsNullOrWhiteSpace(_recipe.Instructions))
+                {
+                    <p class="rd-empty-section">No instructions added.</p>
+                }
+                else
+                {
+                    <p class="rd-instructions">@_recipe.Instructions</p>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Recipe? _recipe;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _recipe = await DbContext.Recipes
+            .Include(r => r.Ingredients)
+                .ThenInclude(i => i.Unit)
+            .FirstOrDefaultAsync(r => r.Id == Id);
+
+        _loading = false;
+    }
+}

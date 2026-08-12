@@ -1,0 +1,58 @@
+@page "/recipes/create"
+@rendermode InteractiveServer
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore
+@using RecipeAndMealTracker.Data
+@using RecipeAndMealTracker.Models
+@* @using RecipeAndMealTracker.Components *@
+@attribute [Authorize]
+@inject AppDbContext DbContext
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Nav
+
+<div class="recipe-form-page">
+    <div class="rf-page-header">
+        <span class="create-recipe-icon"></span>
+        <h3>Add Recipe</h3>
+    </div>
+
+    @if (_units is null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <RecipeForm Model="_recipe" Units="_units" SubmitLabel="Create Recipe" OnValidSubmit="HandleSave" />
+    }
+</div>
+
+@code {
+    private Recipe _recipe = new();
+    private List<MeasurementUnit>? _units;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _units = await DbContext.MeasurementUnits.OrderBy(u => u.Name).ToListAsync();
+    }
+
+    private async Task HandleSave(Recipe recipe)
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        recipe.CreatedById = userId;
+        recipe.CreatedAtUtc = DateTime.UtcNow;
+
+        // Drop any ingredient rows the user added but left blank
+        recipe.Ingredients = recipe.Ingredients
+            .Where(i => !string.IsNullOrWhiteSpace(i.Name))
+            .ToList();
+
+        DbContext.Recipes.Add(recipe);
+        await DbContext.SaveChangesAsync();
+
+        Nav.NavigateTo("/recipes");
+    }
+}

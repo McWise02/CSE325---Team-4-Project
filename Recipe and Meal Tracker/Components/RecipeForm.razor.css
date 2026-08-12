@@ -1,0 +1,180 @@
+.rf-field {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rf-label {
+  font-weight: bold;
+  color: var(--action-color);
+}
+
+.rf-input,
+.rf-textarea {
+  padding: 8px 10px;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background-color: var(--accent-color);
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.rf-input:focus,
+.rf-textarea:focus {
+  border: 3px solid var(--action-color);
+  outline: none;
+}
+
+.rf-textarea {
+  resize: vertical;
+}
+
+.rf-validation {
+  color: #b00020;
+  font-size: 0.85rem;
+}
+
+.rf-ingredients {
+  margin: 1.5rem 0;
+}
+
+.rf-ingredients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.rf-ingredients-header h4 {
+  margin: 0;
+  color: var(--action-color);
+}
+
+.rf-add-ingredient-btn {
+  border: 2px solid var(--action-color);
+  background: var(--accent-color);
+  color: var(--action-color);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.rf-add-ingredient-btn:hover {
+  background: var(--action-color);
+  color: var(--accent-color);
+}
+
+.rf-empty-ingredients {
+  color: #777;
+  font-style: italic;
+}
+
+.rf-ingredient-column-labels {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 32px;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.3rem;
+  padding: 0 2px;
+}
+
+.rf-ingredient-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 32px;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.rf-ing-name,
+.rf-ing-amount,
+.rf-ing-unit,
+.rf-ing-price {
+  padding: 8px;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background-color: var(--accent-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.rf-ing-name:focus,
+.rf-ing-amount:focus,
+.rf-ing-unit:focus,
+.rf-ing-price:focus {
+  border: 3px solid var(--action-color);
+  outline: none;
+}
+
+.rf-remove-btn {
+  background: none;
+  border: 2px solid #b00020;
+  color: #b00020;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rf-remove-btn:hover {
+  background: #b00020;
+  color: white;
+}
+
+.rf-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.rf-cancel-btn {
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid var(--action-color);
+  color: var(--action-color);
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.rf-cancel-btn:hover {
+  background: var(--action-color);
+  color: var(--accent-color);
+}
+
+.rf-submit-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: 2px solid var(--action-color);
+  background: var(--action-color);
+  color: var(--accent-color);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.rf-submit-btn:hover {
+  background: var(--accent-color);
+  color: var(--action-color);
+}
+
+@media (max-width: 700px) {
+  .rf-ingredient-row,
+  .rf-ingredient-column-labels {
+    grid-template-columns: 1fr;
+  }
+
+  .rf-ingredient-column-labels {
+    display: none;
+  }
+}

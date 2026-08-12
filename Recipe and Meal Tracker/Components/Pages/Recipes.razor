@@ -5,8 +5,8 @@
 @using RecipeAndMealTracker.Data
 @using RecipeAndMealTracker.Models
 @attribute [Authorize]
-@* @inject IDbContextFactory<AppDbContext> DbFactory *@
 @inject AppDbContext DbContext
+@inject NavigationManager Nav
 
 <div class="recipes-page">
     <div class="recipes-header">
@@ -49,7 +49,7 @@
         <div class="rp-grid">
             @foreach (var recipe in FilteredRecipes)
             {
-                <div class="rp-card">
+                <div class="rp-card" @onclick='() => Nav.NavigateTo($"/recipes/{recipe.Id}")'>
                     <div class="rp-card-icon">
                         <span class="recipe-icon"></span>
                     </div>
@@ -69,7 +69,7 @@
                     </div>
 
                     <div class="rp-card-footer">
-                        <a class="rp-edit-btn" href="@($"/recipes/{recipe.Id}/edit")">
+                        <a class="rp-edit-btn" href="@($"/recipes/{recipe.Id}/edit")" @onclick:stopPropagation="true">
                             <span class="edit-recipe-icon"></span>
                             Edit
                         </a>

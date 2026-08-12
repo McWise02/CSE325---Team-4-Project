@@ -1,0 +1,98 @@
+@using RecipeAndMealTracker.Models
+@rendermode InteractiveServer
+
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit" FormName="recipe-form">
+    <DataAnnotationsValidator />
+
+    <div class="rf-field">
+        <label class="rf-label" for="recipe-name">Recipe Name</label>
+        <InputText id="recipe-name" class="rf-input" @bind-Value="Model.Name" />
+        <ValidationMessage For="() => Model.Name" class="rf-validation" />
+    </div>
+
+    <div class="rf-field">
+        <label class="rf-label" for="recipe-instructions">Instructions</label>
+        <InputTextArea id="recipe-instructions" class="rf-textarea" rows="6" @bind-Value="Model.Instructions" />
+    </div>
+
+    <div class="rf-ingredients">
+        <div class="rf-ingredients-header">
+            <h4>Ingredients</h4>
+            <button type="button" class="rf-add-ingredient-btn" @onclick="AddIngredient">+ Add Ingredient</button>
+        </div>
+
+        @if (!Model.Ingredients.Any())
+        {
+            <p class="rf-empty-ingredients">No ingredients added yet.</p>
+        }
+        else
+        {
+            <div class="rf-ingredient-column-labels">
+                <span>Name</span>
+                <span>Amount</span>
+                <span>Unit</span>
+                <span>Price</span>
+                <span></span>
+            </div>
+
+            @foreach (var ingredient in Model.Ingredients)
+            {
+                <div class="rf-ingredient-row">
+                    <input class="rf-input rf-ing-name" placeholder="e.g. Garlic" @bind="ingredient.Name"
+                           @bind:event="oninput" />
+
+                    <input class="rf-input rf-ing-amount" type="number" step="0.01" placeholder="Amount"
+                           @bind="ingredient.Amount" />
+
+                    <select class="rf-input rf-ing-unit" @bind="ingredient.UnitId">
+                        <option value="">Unit</option>
+                        @foreach (var unit in Units)
+                        {
+                            <option value="@unit.Id">@unit.Name</option>
+                        }
+                    </select>
+
+                    <input class="rf-input rf-ing-price" type="number" step="0.01" placeholder="Price"
+                           @bind="ingredient.Price" />
+
+                    <button type="button" class="rf-remove-btn" title="Remove ingredient"
+                            @onclick="() => RemoveIngredient(ingredient)">&times;</button>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="rf-actions">
+        <a class="rf-cancel-btn" href="/recipes">Cancel</a>
+        <button type="submit" class="rf-submit-btn">@SubmitLabel</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public Recipe Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public EventCallback<Recipe> OnValidSubmit { get; set; }
+
+    [Parameter]
+    public string SubmitLabel { get; set; } = "Save Recipe";
+
+    [Parameter, EditorRequired]
+    public List<MeasurementUnit> Units { get; set; } = new();
+
+    private void AddIngredient()
+    {
+        Model.Ingredients.Add(new Ingredient());
+    }
+
+    private void RemoveIngredient(Ingredient ingredient)
+    {
+        Model.Ingredients.Remove(ingredient);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await OnValidSubmit.InvokeAsync(Model);
+    }
+}
