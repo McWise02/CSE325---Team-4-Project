@@ -1,0 +1,102 @@
+@page "/recipes/{Id:int}/edit"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using RecipeAndMealTracker.Data
+@using RecipeAndMealTracker.Models
+@* @using RecipeAndMealTracker/ Components *@
+@attribute [Authorize]
+@inject AppDbContext DbContext
+@inject NavigationManager Nav
+
+<div class="recipe-form-page">
+    <div class="rf-page-header">
+        <span class="edit-recipe-icon"></span>
+        <h3>Edit Recipe</h3>
+    </div>
+
+    @if (_loading)
+    {
+        <p>Loading...</p>
+    }
+    else if (_recipe is null)
+    {
+        <p class="rp-empty">Recipe not found.</p>
+    }
+    else
+    {
+        <RecipeForm Model="_recipe" Units="_units" SubmitLabel="Save Changes" OnValidSubmit="HandleSave" />
+
+        <button type="button" class="rf-delete-btn" @onclick="HandleDelete">
+            Delete Recipe
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Recipe? _recipe;
+    private List<MeasurementUnit> _units = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _units = await DbContext.MeasurementUnits.OrderBy(u => u.Name).ToListAsync();
+
+        _recipe = await DbContext.Recipes
+            .Include(r => r.Ingredients)
+            .FirstOrDefaultAsync(r => r.Id == Id);
+
+        _loading = false;
+    }
+
+    private async Task HandleSave(Recipe recipe)
+    {
+        // Drop any ingredient rows the user added but left blank
+        recipe.Ingredients = recipe.Ingredients
+            .Where(i => !string.IsNullOrWhiteSpace(i.Name))
+            .ToList();
+
+        // Remove any ingredients that were deleted from the form
+        var existingIngredients = await DbContext.Ingredients
+            .Where(i => i.RecipeId == recipe.Id)
+            .ToListAsync();
+
+        foreach (var existing in existingIngredients)
+        {
+            if (recipe.Ingredients.All(i => i.Id != existing.Id))
+            {
+                DbContext.Ingredients.Remove(existing);
+            }
+        }
+
+        // Add any newly-created ingredient rows (Id == 0 means not saved yet)
+        foreach (var ingredient in recipe.Ingredients.Where(i => i.Id == 0))
+        {
+            ingredient.RecipeId = recipe.Id;
+            DbContext.Ingredients.Add(ingredient);
+        }
+
+        // Existing ingredients (Id != 0) are already tracked by DbContext
+        // since _recipe was loaded and bound directly to the form, so their
+        // edits are picked up automatically — same for recipe.Name/Instructions.
+        await DbContext.SaveChangesAsync();
+
+        Nav.NavigateTo("/recipes");
+    }
+
+    private async Task HandleDelete()
+    {
+        if (_recipe is null)
+        {
+            return;
+        }
+
+        DbContext.Recipes.Remove(_recipe);
+        await DbContext.SaveChangesAsync();
+
+        Nav.NavigateTo("/recipes");
+    }
+}

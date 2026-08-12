@@ -1,0 +1,45 @@
+.recipe-form-page {
+  padding: 2rem;
+  max-width: 800px;
+}
+
+.rf-page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.rf-page-header h3 {
+  margin: 0;
+  color: var(--action-color);
+}
+
+.rf-page-header .create-recipe-icon,
+.rf-page-header .edit-recipe-icon {
+  width: 28px;
+  height: 28px;
+  background-color: var(--action-color);
+}
+
+.rf-delete-btn {
+  margin-top: 1.5rem;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 2px solid #b00020;
+  background: none;
+  color: #b00020;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.rf-delete-btn:hover {
+  background: #b00020;
+  color: white;
+}
+
+.rp-empty {
+  color: #777;
+  font-style: italic;
+}
